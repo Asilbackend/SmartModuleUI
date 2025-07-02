@@ -4,7 +4,7 @@ import News from './NewsData';
 
 const NewsList = () => {
   return (
-    <div className='mx-auto grid max-w-6xl grid-cols-1 gap-6 p-2 sm:grid-cols-2 lg:grid-cols-3'>
+    <div className='mx-auto grid max-w-6xl grid-cols-1 gap-4 p-2 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6'>
       {News.map((news) => (
         <Link
           key={news.id}
@@ -13,7 +13,7 @@ const NewsList = () => {
         >
           <img src={news.img} alt={news.title} className='w-full rounded-t-3xl object-cover' />
           <div className='space-y-2 px-4 pt-2 pb-6'>
-            <h3 className='text-xl font-semibold'>{news.title}</h3>
+            <h3 className='text-lg leading-6 font-semibold xl:text-xl'>{news.title}</h3>
             <p className='line-clamp-3 text-sm text-gray-600'>{news.description}</p>
           </div>
         </Link>

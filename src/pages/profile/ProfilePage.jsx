@@ -15,12 +15,15 @@ const ProfilePage = () => {
 
   return (
     <div className='mx-auto max-w-6xl'>
-      <div className='flex w-full items-center gap-3 rounded-4xl bg-white p-3 shadow-xs'>
-        <UserRound strokeWidth={1} className='rounded-full bg-[#F0F7FF] p-1' size={48} />
-        <h2 className='text-2xl'>Yoqubjonov Abubakir Iskandar o’g’li</h2>
+      <div className='flex w-full items-center gap-1 rounded-4xl bg-white p-1 shadow-xs sm:gap-3 sm:p-2 md:p-3'>
+        <UserRound
+          strokeWidth={1}
+          className='h-8 w-8 rounded-full bg-[#F0F7FF] p-1 md:h-12 md:w-12'
+        />
+        <h2 className='text-lg sm:text-xl md:text-2xl'>Yoqubjonov Abubakir Iskandar o’g’li</h2>
       </div>
-      <div className='grid grid-cols-12 gap-8 pt-8'>
-        <div className='col-span-12 md:col-span-5'>
+      <div className='grid grid-cols-12 gap-4 pt-4 sm:gap-6 sm:pt-6 md:gap-8 md:pt-8'>
+        <div className='col-span-12 space-y-4 md:col-span-6 md:space-y-8 lg:col-span-5'>
           <div className='rounded-3xl bg-white shadow-xs'>
             <video
               controls
@@ -40,11 +43,11 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-          <div className='mt-8 rounded-3xl bg-white p-4 shadow-xs'>
+          <div className='rounded-3xl bg-white p-4 shadow-xs'>
             <h3 className='pb-4 text-2xl font-semibold'>Tavsiya etilgan videolar</h3>
-            <div className='flex'>
-              <img src='./image.png' alt='image' />
-              <div className='ml-4'>
+            <div className='xl:flex'>
+              <img src='./image.png' alt='image' className='' />
+              <div className='mt-2 xl:mt-0 xl:ml-4'>
                 <h4 className='text-lg font-medium'>Unversitet imkoniyatlaridan foydalanish</h4>
                 <p className='text-sm'>Hisob fanidan ozlashtira olmaganigiz uchun</p>
               </div>
@@ -54,8 +57,8 @@ const ProfilePage = () => {
             </button>
           </div>
         </div>
-        <div className='col-span-12 md:col-span-7'>
-          <div className='rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs'>
+        <div className='col-span-12 md:col-span-6 lg:col-span-7'>
+          <div className='rounded-2xl bg-white px-4 pt-4 pb-4 shadow-xs md:pb-6'>
             <h2 className='mb-4 text-2xl font-semibold'>🏅 Sertifikatlarim</h2>
             <div className='space-y-2'>
               {certificates.map((c, i) => (
@@ -66,16 +69,16 @@ const ProfilePage = () => {
               ))}
             </div>
           </div>
-          <div className='mt-8 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs'>
+          <div className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'>
             <div className='flex gap-1'>
               <Medal size={30} color='red' strokeWidth={1} />
               <h2 className='mb-4 text-2xl font-semibold'>Test natijalari</h2>
             </div>
-            <div className='grid grid-cols-4 gap-6'>
+            <div className='grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3 xl:grid-cols-4'>
               {testResults.map((res, i) => (
                 <div
                   key={i}
-                  className='flex flex-col items-center rounded-2xl bg-[#EDF5FF] px-2 py-4'
+                  className='flex flex-col items-center rounded-2xl bg-[#EDF5FF] px-2 py-2 sm:py-4'
                 >
                   <div className='mb-2 rounded-full border border-blue-600 px-6 py-9 text-center'>
                     <p className='text-3xl font-semibold'>{res.score}%</p>

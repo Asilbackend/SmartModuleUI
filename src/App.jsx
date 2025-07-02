@@ -24,17 +24,17 @@ const App = () => {
         <Route path='enlightenment' element={<EnlightenmentPage />} />
         <Route path='modules' element={<ModulesList />} />
         <Route path='modules/:id/content' element={<Contents />} />
+        <Route path='profile' element={<ProfilePage />} />
+        <Route path='recommended' element={<RecomendedModuls />} />
+        <Route path='news' element={<News />}>
+          <Route index element={<NewsList />} />
+          <Route path=':id' element={<NewsDetail />} />
+        </Route>
+        <Route path='certificates' element={<Certificates />}>
+          <Route index element={<CertificatesList />} />
+          <Route path=':id' element={<CertificatesDetail />} />
+        </Route>
       </Route>
-      <Route path='recommended' element={<RecomendedModuls />} />
-      <Route path='news' element={<News />}>
-        <Route index element={<NewsList />} />
-        <Route path=':id' element={<NewsDetail />} />
-      </Route>
-      <Route path='certificates' element={<Certificates />}>
-        <Route index element={<CertificatesList />} />
-        <Route path=':id' element={<CertificatesDetail />} />
-      </Route>
-      <Route path='profile' element={<ProfilePage />} />
     </Routes>
   );
 };
