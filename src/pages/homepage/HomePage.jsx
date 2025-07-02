@@ -47,7 +47,7 @@ const HomePage = () => {
           Barchasini korish
         </Link>
       </div>
-      <div className='mb-12 grid grid-cols-3 gap-5'>
+      <div className='mb-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3'>
         {topNews.map((item, index) => (
           <VideoCard key={index} title={item.title} desc={item.description} />
         ))}

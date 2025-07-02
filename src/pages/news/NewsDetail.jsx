@@ -15,7 +15,7 @@ const NewsDetail = () => {
     .slice(0, 3);
 
   return (
-    <div className='mx-auto max-w-6xl space-y-12 p-2'>
+    <div className='mx-auto max-w-6xl space-y-4 p-2 sm:space-y-8 lg:space-y-12'>
       <div className='rounded-3xl bg-white shadow-xs'>
         {newsItem.video ? (
           <video
@@ -33,9 +33,9 @@ const NewsDetail = () => {
             className='mb-4 h-[520px] w-full rounded-3xl object-cover'
           />
         )}
-        <div className='px-5 py-2'>
-          <h2 className='mb-2 text-3xl font-bold'>{newsItem.title}</h2>
-          <p className='mb-4 text-lg'>{newsItem.description}</p>
+        <div className='px-5 py-1 md:py-2'>
+          <h2 className='mb-2 text-2xl font-bold xl:text-3xl'>{newsItem.title}</h2>
+          <p className='mb-4 xl:text-lg'>{newsItem.description}</p>
         </div>
       </div>
 

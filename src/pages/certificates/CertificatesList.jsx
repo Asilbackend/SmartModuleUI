@@ -28,7 +28,7 @@ const Certificates = () => {
         {certificatesData.map((certificate) => (
           <div
             key={certificate.id}
-            className='flex items-center justify-between rounded-2xl bg-white p-6 shadow-xs transition-shadow duration-200 hover:shadow-sm'
+            className='flex flex-col justify-between gap-2 rounded-2xl bg-white p-3 shadow-xs transition-shadow duration-200 hover:shadow-sm md:flex-row md:items-end md:p-6 xl:gap-0'
           >
             <div>
               <h3 className='text-xl font-semibold text-black'>{certificate.title}</h3>
@@ -36,7 +36,7 @@ const Certificates = () => {
             </div>
             <Link
               to={`${certificatesData.id}`}
-              className='cursor-pointer rounded-full bg-[#008CFF] px-4 py-2 text-sm font-medium text-white'
+              className='mt-4 min-w-44 cursor-pointer rounded-full bg-[#008CFF] px-4 py-2 text-center text-sm font-medium text-white md:mt-0'
             >
               Sertifikatni ko‘rish
             </Link>
