@@ -1,4 +1,5 @@
 import { Button, Input } from 'antd';
+// import axios from 'axios';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +42,28 @@ const LoginForm = () => {
       navigate('/home');
     }
   };
+
+  // const formSubmitHandler = async (data) => {
+  //   try {
+  //     const res = await axios.post('https://dev.anvarovich.uz/auth/login', {
+  //       username: data.login,
+  //       password: data.parol,
+  //     });
+
+  //     const token = res.data?.token;
+  //     if (token) {
+  //       localStorage.setItem('token', token); // 🔐 token saqlanadi
+  //       message.success('Muvaffaqiyatli login qilindi!');
+  //       navigate('/home'); // ✅ Kirishdan keyin boshqa sahifaga o‘tish
+  //     } else {
+  //       message.error('Token qaytmadi. Login muvaffaqiyatsiz.');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     const msg = error?.response?.data?.message || 'Login yoki parolda xatolik!';
+  //     message.error(msg);
+  //   }
+  // };
 
   return (
     <form
