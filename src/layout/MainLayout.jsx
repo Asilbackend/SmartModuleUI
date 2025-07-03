@@ -9,7 +9,7 @@ const MainLayout = () => {
         <Header />
       </div>
       <div className='flex flex-1 overflow-hidden'>
-        <div className='h-screen'>
+        <div className='hidden h-screen lg:block'>
           <Sidebar />
         </div>
         <main className='flex-1 overflow-y-auto bg-[#F0F7FF] px-4 pt-3 pb-12 sm:px-8 md:px-12'>

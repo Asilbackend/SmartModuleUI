@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import { Link } from 'react-router-dom';
 
 const VideoCard = ({ title, desc }) => (
@@ -40,11 +41,10 @@ const HomePage = () => {
       </video>
       <div className='mb-2 flex items-center justify-between'>
         <h2 className='mb-4 text-3xl font-semibold'>Top videolar</h2>
-        <Link
-          to='/news'
-          className='cursor-pointer rounded-4xl border border-[#008CFF] bg-white px-4 py-2 font-semibold text-[#008CFF]'
-        >
-          Barchasini korish
+        <Link to='/news'>
+          <Button className='cursor-pointer !rounded-4xl border border-[#008CFF] bg-white !px-4 !py-2 font-semibold text-[#008CFF]'>
+            Barchasini korish
+          </Button>
         </Link>
       </div>
       <div className='mb-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3'>
