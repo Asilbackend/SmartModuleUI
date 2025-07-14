@@ -30,7 +30,7 @@ const HomePage = () => {
     },
   ];
   return (
-    <div className='mx-auto max-w-6xl py-2'>
+    <div className='mx-auto max-w-6xl'>
       <video
         poster='/news-image.png'
         className='mb-12 h-[520px] w-full rounded-3xl bg-blue-500 object-cover shadow-xs'

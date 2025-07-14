@@ -1,30 +1,51 @@
-import { UserRound } from 'lucide-react';
-import { Medal } from 'lucide-react';
+import { Button, Flex, Progress } from 'antd';
+import { Check, Eye, X } from 'lucide-react';
+import { useState } from 'react';
+
 const ProfilePage = () => {
-  const certificates = [
-    { title: 'Faol talaba', place: '1-o‘rin' },
-    { title: 'Faol talaba', place: '3-o‘rin' },
-    { title: 'Faol talaba', place: '2-o‘rin' },
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClick = () => {
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  const student = {
+    ism: 'Abubakir',
+    familiya: 'Yoqubjonov',
+    yonalish: 'Suniy Intelekt',
+    oqishTili: 'Uz',
+    kurs: 2,
+    guruh: '261-23',
+    daraja: 'Bakalavr',
+    talimShakli: 'Kunduzgi',
+    stipendiya: 'Yo‘q',
+  };
+
+  const leftInfo = [
+    { label: 'Ism', value: student.ism },
+    { label: 'Familiya', value: student.familiya },
+    { label: 'Yo’nalish', value: student.yonalish },
+    { label: 'O’qish tili', value: student.oqishTili },
+    { label: 'Kurs', value: student.kurs },
+    { label: 'Guruh', value: student.guruh },
   ];
-  const testResults = Array(8).fill({
-    score: 60,
-    correct: 8,
-    total: 10,
-    label: 'Tartib intizom testi',
-  });
+
+  const rightInfo = [
+    { label: 'Guruh', value: student.guruh },
+    { label: 'Darajasi', value: student.daraja },
+    { label: 'Ta’lim shakli', value: student.talimShakli },
+    { label: 'Stipendiya', value: student.stipendiya },
+  ];
 
   return (
     <div className='mx-auto max-w-6xl'>
-      <div className='flex w-full items-center gap-1 rounded-4xl bg-white p-1 shadow-xs sm:gap-3 sm:p-2 md:p-3'>
-        <UserRound
-          strokeWidth={1}
-          className='h-8 w-8 rounded-full bg-[#F0F7FF] p-1 md:h-12 md:w-12'
-        />
-        <h2 className='text-lg sm:text-xl md:text-2xl'>Yoqubjonov Abubakir Iskandar o’g’li</h2>
-      </div>
-      <div className='grid grid-cols-12 gap-4 pt-4 sm:gap-6 sm:pt-6 md:gap-8 md:pt-8'>
-        <div className='col-span-12 space-y-4 md:col-span-6 md:space-y-8 lg:col-span-5'>
-          <div className='rounded-3xl bg-white shadow-xs'>
+      <div className='gap-4 sm:gap-6 md:gap-8'>
+        <div className='grid grid-cols-12 gap-6 md:col-span-6 lg:col-span-5'>
+          <div className='col-span-5 rounded-3xl bg-white shadow-xs'>
             <video
               controls
               poster='/news-image.png'
@@ -43,55 +64,129 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-3xl bg-white p-4 shadow-xs'>
-            <h3 className='pb-4 text-2xl font-semibold'>Tavsiya etilgan videolar</h3>
-            <div className='xl:flex'>
-              <img src='./image.png' alt='image' className='' />
-              <div className='mt-2 xl:mt-0 xl:ml-4'>
-                <h4 className='text-lg font-medium'>Unversitet imkoniyatlaridan foydalanish</h4>
-                <p className='text-sm'>Hisob fanidan ozlashtira olmaganigiz uchun</p>
+          <div className='col-span-7 rounded-3xl bg-white p-4 shadow-xs'>
+            <div className='flex max-w-3xl flex-col rounded-lg md:flex-row'>
+              <div className='flex items-center justify-center p-4 md:w-1/3'>
+                <img
+                  src='./image.png'
+                  alt='Talaba rasmi'
+                  className='h-60 w-full rounded-lg object-cover'
+                />
+              </div>
+              <div className='p-6 md:w-2/3'>
+                <div className='grid grid-cols-1 md:grid-cols-2'>
+                  <div className='border-r pr-2'>
+                    {leftInfo.map((item) => (
+                      <p className='py-1' key={item.label}>
+                        <span className='font-semibold'>{item.label}:</span> {item.value}
+                      </p>
+                    ))}
+                  </div>
+                  <div className='pl-3'>
+                    {rightInfo.map((item) => (
+                      <p key={item.label} className='py-1'>
+                        <span className='font-semibold'>{item.label}:</span> {item.value}
+                      </p>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            <button className='mt-4 w-full cursor-pointer rounded-2xl bg-blue-600 py-3 text-xl font-semibold text-white'>
-              Videolarni ko`rish
-            </button>
           </div>
         </div>
+
         <div className='col-span-12 md:col-span-6 lg:col-span-7'>
-          <div className='rounded-2xl bg-white px-4 pt-4 pb-4 shadow-xs md:pb-6'>
-            <h2 className='mb-4 text-2xl font-semibold'>🏅 Sertifikatlarim</h2>
-            <div className='space-y-2'>
-              {certificates.map((c, i) => (
-                <div key={i} className='flex justify-between rounded-full bg-[#EDF5FF] px-4 py-2'>
-                  <span>{c.title}</span>
-                  <span>{c.place}</span>
-                </div>
-              ))}
+          <div className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'>
+            <div className='mb-8 flex'>
+              <div>
+                <h2 className='mb-2 text-2xl font-semibold'>
+                  1. Universitet tarixi va tashkiliy tuzilmasi (Required)
+                </h2>
+                <p className='text-lg'>Universitetning istiqbolli yo’nalishlari (Matn)</p>
+              </div>
+              <div className='ml-auto flex flex-col items-end gap-2'>
+                <Button
+                  type='primary'
+                  icon={<Check strokeWidth={1.5} />}
+                  size='large'
+                  iconPosition='end'
+                  ghost
+                >
+                  Tugallangan
+                </Button>
+                <Button
+                  onClick={handleClick}
+                  type='primary'
+                  icon={<Eye strokeWidth={1.5} />}
+                  size='large'
+                  iconPosition='end'
+                >
+                  Sertifikatni ko`rish
+                </Button>
+              </div>
             </div>
+            <Flex gap='small' vertical>
+              <Progress
+                percent={60}
+                percentPosition={{ align: 'center', type: 'inner' }}
+                style={{ width: '100%', height: '40%' }}
+                strokeWidth={20}
+                strokeColor='#008CFF'
+              />
+            </Flex>
           </div>
           <div className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'>
-            <div className='flex gap-1'>
-              <Medal size={30} color='red' strokeWidth={1} />
-              <h2 className='mb-4 text-2xl font-semibold'>Test natijalari</h2>
-            </div>
-            <div className='grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3 xl:grid-cols-4'>
-              {testResults.map((res, i) => (
-                <div
-                  key={i}
-                  className='flex flex-col items-center rounded-2xl bg-[#EDF5FF] px-2 py-2 sm:py-4'
+            <div className='mb-8 flex'>
+              <div>
+                <h2 className='mb-2 text-2xl font-semibold'>
+                  1. Universitet tarixi va tashkiliy tuzilmasi (Required)
+                </h2>
+                <p className='text-lg'>Universitetning istiqbolli yo’nalishlari (Matn)</p>
+              </div>
+              <div className='ml-auto flex flex-col items-end gap-2'>
+                <Button
+                  type='primary'
+                  icon={<Check strokeWidth={1.5} />}
+                  size='large'
+                  iconPosition='end'
+                  ghost
                 >
-                  <div className='mb-2 rounded-full border border-blue-600 px-6 py-9 text-center'>
-                    <p className='text-3xl font-semibold'>{res.score}%</p>
-                  </div>
-                  <p className='mt-1 text-sm font-medium'>
-                    {res.correct}/{res.total}
-                  </p>
-                  <p className='text-center text-xs font-medium'>{res.label}</p>
-                </div>
-              ))}
+                  Tugallangan
+                </Button>
+                <Button
+                  onClick={handleClick}
+                  type='primary'
+                  icon={<Eye strokeWidth={1.5} />}
+                  size='large'
+                  iconPosition='end'
+                >
+                  Sertifikatni ko`rish
+                </Button>
+              </div>
             </div>
+            <Flex gap='small' vertical>
+              <Progress
+                percent={80}
+                percentPosition={{ align: 'center', type: 'inner' }}
+                style={{ width: '100%', height: '40%' }}
+                strokeWidth={20}
+                strokeColor='#008CFF'
+              />
+            </Flex>
           </div>
         </div>
+
+        {isOpen && (
+          <div className='bg-opacity-80 fixed inset-0 z-70 flex items-center justify-center bg-gradient-to-b from-gray-800 to-blue-700'>
+            <X
+              size={40}
+              strokeWidth={1}
+              className='absolute top-20 right-20 cursor-pointer text-white'
+              onClick={handleClose}
+            />
+            <img src='/sertifikat.png' className='w-[80%] max-w-4xl select-none' />
+          </div>
+        )}
       </div>
     </div>
   );

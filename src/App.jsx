@@ -9,11 +9,11 @@ import Contents from './pages/contents/Contents.jsx';
 import EnlightenmentPage from './pages/enlightenment/EnlightenmentPage';
 import HomePage from './pages/homepage/HomePage';
 import ModulesList from './pages/modules/ModulesList';
+import ModuleVideo from './pages/modules/ModuleVideo';
 import News from './pages/news/News';
 import NewsDetail from './pages/news/NewsDetail';
 import NewsList from './pages/news/NewsList';
 import ProfilePage from './pages/profile/ProfilePage';
-import RecomendedModuls from './pages/recomended/RecomendedModuls';
 
 const App = () => {
   return (
@@ -22,10 +22,10 @@ const App = () => {
       <Route path='/' element={<MainLayout />}>
         <Route path='home' element={<HomePage />} />
         <Route path='enlightenment' element={<EnlightenmentPage />} />
-        <Route path='modules' element={<ModulesList />} />
-        <Route path='modules/:id/content' element={<Contents />} />
+        <Route path='modules' element={<Contents />} />
+        <Route path='modules/:id' element={<ModulesList />} />
+        <Route path='/modules/:moduleId/video/:videoId' element={<ModuleVideo />} />
         <Route path='profile' element={<ProfilePage />} />
-        <Route path='recommended' element={<RecomendedModuls />} />
         <Route path='news' element={<News />}>
           <Route index element={<NewsList />} />
           <Route path=':id' element={<NewsDetail />} />
