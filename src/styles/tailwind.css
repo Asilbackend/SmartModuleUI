@@ -1,1 +1,24 @@
 @import 'tailwindcss';
+
+.my-custom-checkbox .ant-checkbox-inner {
+    border-radius: 50%;
+    border-color: #1890ff;
+    padding: 2px;
+    font-: 20px;
+}
+
+.my-custom-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #1890ff;
+    border-color: #1890ff;
+
+}
+ .my-custom-checkbox .ant-checkbox-inner {
+        @apply rounded-full;
+        width: 20px;
+        /* kattaroq checkbox */
+        height: 20px;    }
+
+.my-custom-checkbox .ant-checkbox-inner::after {
+    /* check iconning rangi */
+    border-color: white;
+}

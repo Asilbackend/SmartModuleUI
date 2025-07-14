@@ -1,50 +1,87 @@
-import { Link } from 'react-router-dom';
+import { Steps } from 'antd';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const ModulesList = () => {
-  const fetchModules = () => {
-    // Simulated API response
-    return [
-      { id: 1, name: 'Module A', description: 'Core system module', status: 'Required' },
-      { id: 2, name: 'Module B', description: 'Authentication module', status: 'Optional' },
-      { id: 3, name: 'Module C', description: 'Payment processing', status: 'Required' },
-      { id: 4, name: 'Module D', description: 'User management', status: 'Optional' },
-      { id: 5, name: 'Module E', description: 'Analytics dashboard', status: 'Required' },
-    ];
+import { modules } from '../../data/moduleData';
+
+export default function ModuleList() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const mod = modules.find((m) => m.id === Number(id));
+
+  if (!mod) return <div className='p-8'>Modul topilmadi</div>;
+
+  const STORAGE_KEY = `module_steps_${mod.id}`;
+  const [currentSteps, setCurrentSteps] = useState({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      setCurrentSteps(JSON.parse(saved));
+    } else {
+      const initial = mod.sections.reduce((acc, section) => {
+        acc[section.id] = 0; // faqat birinchi step ochiq
+        return acc;
+      }, {});
+      setCurrentSteps(initial);
+    }
+  }, [id]);
+
+  const handleStepClick = (sectionId, index, item) => {
+    // Faqat navbatdagi stepni bosilganda currentSteps yangilanadi
+    if (index === currentSteps[sectionId]) {
+      const updated = { ...currentSteps, [sectionId]: currentSteps[sectionId] + 1 };
+      setCurrentSteps(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    }
+
+    // Har holda sahifaga o‘tadi
+    navigate(`/modules/${mod.id}/video/${item.id}`);
   };
 
-  const modules = fetchModules();
-
   return (
-    <div className='mx-auto max-w-7xl space-y-4 px-4 py-6 sm:px-6 lg:px-8'>
-      {modules.map((module) => (
-        <Link
-          key={module.id}
-          to={`/modules/${module.id}/content`}
-          className='block rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md'
-        >
-          <div className='flex flex-col justify-between p-4 sm:flex-row sm:items-center sm:p-6'>
-            <div className='flex-1'>
-              <h3 className='truncate text-base font-semibold text-gray-900 sm:text-lg'>
-                {module.name}
-              </h3>
-              <p className='mt-1 line-clamp-2 text-xs text-gray-600 sm:text-sm'>
-                {module.description}
-              </p>
-            </div>
-            <span
-              className={`mt-2 rounded-full px-3 py-1 text-xs font-medium sm:mt-0 ${
-                module.status === 'Required'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              {module.status}
-            </span>
-          </div>
-        </Link>
+    <div className='px-8 py-6'>
+      <div className='mb-6 rounded-2xl bg-white p-6 shadow-sm'>
+        <h2 className='mb-4 text-2xl font-semibold'>Modullar video va matnlardan iborat.</h2>
+        <p className='text-gray-700'>
+          Har bir modulda bo‘limlar, bo‘limlarda esa darslar ketma-ketlikda.
+        </p>
+      </div>
+
+      {mod.sections.map((section) => (
+        <div key={section.id} className='mb-8 rounded-2xl bg-white p-6 shadow-sm'>
+          <h2 className='mb-4 text-2xl font-semibold text-blue-900'>
+            {section.id}. {section.title}
+          </h2>
+
+          <Steps
+            direction='vertical'
+            current={currentSteps[section.id]}
+            items={section.items.map((item, index) => ({
+              title: item.title,
+              description: (
+                <div className='flex items-center justify-between'>
+                  <div className='flex gap-2 text-gray-500'>
+                    <p className='text-sm'>{item.type}</p>
+                    <p className='text-sm'>{item.duration}</p>
+                  </div>
+                  {/* 🔑 Qoidani shu yerda tekshiramiz:
+                        - Agar step index <= current => tugma ko‘rinadi
+                        - Faqat keyingi step tugmasi ko‘rinmaydi */}
+                  {index <= currentSteps[section.id] && (
+                    <button
+                      onClick={() => handleStepClick(section.id, index, item)}
+                      className='rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'
+                    >
+                      Ko‘rish
+                    </button>
+                  )}
+                </div>
+              ),
+            }))}
+          />
+        </div>
       ))}
     </div>
   );
-};
-
-export default ModulesList;
+}
