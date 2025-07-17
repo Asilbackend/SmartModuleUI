@@ -20,9 +20,12 @@ export default function StoryCircle({ imageSrc }) {
 
   return (
     <div className='flex flex-col items-center'>
-      <div className='relative h-20 w-20 cursor-pointer rounded-full' onClick={handleClick}>
+      <div
+        className='relative h-18 w-18 cursor-pointer rounded-full sm:h-20 sm:w-20'
+        onClick={handleClick}
+      >
         <motion.div
-          className='absolute top-0 left-0 h-full w-full rounded-full border-4 border-blue-500'
+          className='absolute top-0 left-0 h-full w-full rounded-full border-3 border-blue-500 sm:border-4'
           initial={false}
           animate={
             isPlaying
@@ -38,7 +41,7 @@ export default function StoryCircle({ imageSrc }) {
           <X
             size={40}
             strokeWidth={1}
-            className='absolute top-5 right-10 cursor-pointer text-white md:top-15 md:right-30'
+            className='absolute top-2 right-3 cursor-pointer text-white sm:top-5 sm:right-10 md:top-15 md:right-30'
             onClick={handleClose}
           />
           {/* <video src={videoSrc} controls autoPlay className='w-[80%] max-w-xl rounded-xl' /> */}

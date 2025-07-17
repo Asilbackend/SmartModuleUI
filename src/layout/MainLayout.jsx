@@ -26,7 +26,7 @@ const MainLayout = () => {
           {/* StoryCircle faqat kerak bo‘lsa */}
           {!hideStoryCircle && (
             <div className='overflow-x-auto bg-white'>
-              <div className='flex w-max gap-4 px-6 py-2'>
+              <div className='flex w-max gap-4 px-6 pb-2'>
                 {[...Array(10)].map((_, idx) => (
                   <div key={idx} className='flex-shrink-0'>
                     <StoryCircle imageSrc={storyImage} videoSrc={storyVideo} />
