@@ -1,7 +1,7 @@
 // src/api/axiosClient.js
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8082/api';
+const BASE_URL = 'https://dev.anvarovich.uz/api';
 const axiosClient = axios.create({
   //   https://dev.anvarovich.uz/api   ==>serverga yuklashdan oldin buni activlashtrish kerak
   baseURL: BASE_URL,
