@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { Rate } from 'antd';
-import { useParams } from 'react-router-dom';
 import { MessageCircle, Send, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { modules } from '../../data/moduleData';
 
@@ -73,7 +73,7 @@ export default function ModuleVideo() {
             placeholder='Fikr bildirish'
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className='flex-1 rounded-2xl border border-gray-400 focus:outline-none focus:cursor-text px-4 py-2'
+            className='focus:cursor-gittext flex-1 rounded-2xl border border-gray-400 px-4 py-2 focus:outline-none'
           />
           <button
             onClick={handleAddComment}

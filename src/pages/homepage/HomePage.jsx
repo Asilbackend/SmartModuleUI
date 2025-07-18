@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const VideoCard = ({ title, desc }) => (
-  <div className='relative rounded-3xl bg-white shadow-xs cursor-pointer'>
+  <div className='relative cursor-pointer rounded-3xl bg-white shadow-xs'>
     <img src='/news-image.png' className='w-full rounded-3xl' alt='Image' />
     <div className='space-y-2 px-4 pt-2 pb-12'>
       <h3 className='text-xl font-semibold'>{title}</h3>
