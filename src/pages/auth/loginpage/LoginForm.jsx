@@ -1,6 +1,6 @@
-import { Button, Input } from 'antd';
-// import axios from 'axios';
-import React from 'react';
+import axiosClient from '@components/service/axiosClient.js';
+import { Button, Input, message } from 'antd';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,34 +36,80 @@ const LoginForm = () => {
     reValidateMode: 'onChange',
   });
 
-  const formSubmitHandler = (data) => {
-    console.log(data);
-    if (data.login && data.parol) {
-      navigate('/home');
-    }
-  };
-
-  // const formSubmitHandler = async (data) => {
-  //   try {
-  //     const res = await axios.post('https://dev.anvarovich.uz/auth/login', {
-  //       username: data.login,
-  //       password: data.parol,
-  //     });
-
-  //     const token = res.data?.token;
-  //     if (token) {
-  //       localStorage.setItem('token', token); // 🔐 token saqlanadi
-  //       message.success('Muvaffaqiyatli login qilindi!');
-  //       navigate('/home'); // ✅ Kirishdan keyin boshqa sahifaga o‘tish
-  //     } else {
-  //       message.error('Token qaytmadi. Login muvaffaqiyatsiz.');
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     const msg = error?.response?.data?.message || 'Login yoki parolda xatolik!';
-  //     message.error(msg);
+  // const formSubmitHandler = (data) => {
+  //   console.log(data);
+  //   if (data.login && data.parol) {
+  //     navigate('/home');
   //   }
   // };
+  // utils/checkToken.js
+  function isJwtValid(token) {
+    if (!token) return false;
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      const now = Math.floor(Date.now() / 1000);
+      return decodedPayload.exp && decodedPayload.exp > now;
+    } catch (error) {
+      console.error('Token decode error:', error);
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (isJwtValid(accessToken)) {
+        navigate('/home');
+        return;
+      }
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!isJwtValid(refreshToken)) {
+        localStorage.clear();
+        return;
+      }
+
+      try {
+        const res = await axiosClient.post('/auth/refresh-token', null, {
+          params: { refreshToken },
+        });
+
+        const accessToken = res.data?.accessToken;
+        localStorage.setItem('accessToken', accessToken);
+        navigate('/home');
+      } catch (error) {
+        localStorage.clear();
+        console.error('Refresh token xato:', error);
+      }
+    };
+
+    checkToken();
+  }, [navigate]);
+
+  const formSubmitHandler = async (data) => {
+    try {
+      const res = await axiosClient.post('/auth/login', {
+        login: data.login,
+        password: data.parol,
+      });
+
+      const { accessToken, refreshToken } = res.data;
+
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        message.success('Muvaffaqiyatli login qilindi!');
+        navigate('/home');
+      } else {
+        message.error('Token qaytmadi. Login muvaffaqiyatsiz.');
+      }
+    } catch (error) {
+      console.error(error);
+      const msg = error?.response?.data?.message || 'Login yoki parolda xatolik!';
+      message.error(msg);
+    }
+  };
 
   return (
     <form

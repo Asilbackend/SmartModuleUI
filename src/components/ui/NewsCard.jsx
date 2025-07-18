@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 
 function NewsCard({ img, title, subtitle }) {
   return (
