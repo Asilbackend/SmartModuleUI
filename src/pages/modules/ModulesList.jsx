@@ -9,24 +9,25 @@ export default function ModuleList() {
   const navigate = useNavigate();
   const mod = modules.find((m) => m.id === Number(id));
 
-  if (!mod) return <div className='p-8'>Modul topilmadi</div>;
+  const STORAGE_KEY = `module_steps_${mod?.id}`; // `mod` bo‘lishi shart emas
 
-  const STORAGE_KEY = `module_steps_${mod.id}`;
   const [currentSteps, setCurrentSteps] = useState({});
 
   useEffect(() => {
+    if (!mod) return; // hook ichida tekshiriladi
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       setCurrentSteps(JSON.parse(saved));
     } else {
       const initial = mod.sections.reduce((acc, section) => {
-        acc[section.id] = 0; // faqat birinchi step ochiq
+        acc[section.id] = 0;
         return acc;
       }, {});
       setCurrentSteps(initial);
     }
-  }, [id]);
+  }, [STORAGE_KEY, mod]);
 
+  if (!mod) return <div className='p-8'>Modul topilmadi</div>;
   const handleStepClick = (sectionId, index, item) => {
     // Faqat navbatdagi stepni bosilganda currentSteps yangilanadi
     if (index === currentSteps[sectionId]) {
