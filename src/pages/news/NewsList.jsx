@@ -1,23 +1,26 @@
-import { Link } from 'react-router-dom';
+import { X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-import News from './NewsData';
+import MyCustomPlayer from '@/components/ui/CustomPlayer';
 
 const NewsList = () => {
+  const navigate = useNavigate(); // `useNavigate` ni chaqirasan
+
+  const handleClose = () => {
+    navigate(-1); // Bu tarixda bir qadam orqaga qaytaradi
+  };
+
   return (
     <div className='mx-auto grid max-w-6xl grid-cols-1 gap-4 p-2 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6'>
-      {News.map((news) => (
-        <Link
-          key={news.id}
-          to={`${news.id}`}
-          className='block overflow-hidden rounded-3xl bg-white shadow-xs transition-all duration-200 hover:shadow-md'
-        >
-          <img src={news.img} alt={news.title} className='w-full rounded-t-3xl object-cover' />
-          <div className='space-y-2 px-4 pt-2 pb-6'>
-            <h3 className='text-lg leading-6 font-semibold xl:text-xl'>{news.title}</h3>
-            <p className='line-clamp-3 text-sm text-gray-600'>{news.description}</p>
-          </div>
-        </Link>
-      ))}
+      <div className='bg-opacity-80 fixed inset-0 z-70 flex items-center justify-center bg-gradient-to-b from-gray-800 to-blue-800'>
+        <X
+          size={40}
+          strokeWidth={1}
+          className='absolute top-2 right-3 cursor-pointer text-white sm:top-5 sm:right-10 md:top-15 md:right-30'
+          onClick={handleClose}
+        />
+        <MyCustomPlayer />
+      </div>
     </div>
   );
 };

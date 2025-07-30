@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 // src/routes/ProtectedRoute.jsx
 import { Navigate, Outlet } from 'react-router-dom';
 
+import NotFound from '@/pages/notFound/NotFound.jsx';
+
 import MainLayout from './layout/MainLayout';
 import Loginpage from './pages/auth/loginpage/Loginpage';
 import Certificates from './pages/certificates/Certificates';
@@ -13,10 +15,8 @@ import HomePage from './pages/homepage/HomePage';
 import ModulesList from './pages/modules/ModulesList';
 import ModuleVideo from './pages/modules/ModuleVideo';
 import News from './pages/news/News';
-import NewsDetail from './pages/news/NewsDetail';
 import NewsList from './pages/news/NewsList';
 import ProfilePage from './pages/profile/ProfilePage';
-import NotFound from '@/pages/notFound/NotFound.jsx';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('accessToken');
@@ -38,7 +38,6 @@ const App = () => {
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/news' element={<News />}>
             <Route index element={<NewsList />} />
-            <Route path=':id' element={<NewsDetail />} />
           </Route>
           <Route path='/certificates' element={<Certificates />}>
             <Route index element={<CertificatesList />} />

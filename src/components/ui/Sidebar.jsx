@@ -24,6 +24,12 @@ const Sidebar = () => {
     <aside className={`h-screen duration-200 ${isOpen ? 'w-64' : 'w-20'}`}>
       <nav className='space-y-3 px-4 pt-4'>
         <div className='mt-2 space-y-4'>
+          <div className='w-max rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF]'>
+            <ArrowLeftToLine
+              className={`cursor-pointer duration-100 ${!isOpen && 'rotate-180'}`}
+              onClick={() => setIsOpen(!isOpen)}
+            />
+          </div>
           {otherNavItems.map((item) => (
             <NavLink
               key={item.name}
@@ -65,6 +71,7 @@ const Sidebar = () => {
               >
                 Modullar
               </p>
+
               {isOpen && (
                 <ChevronDown
                   className={`ml-auto transition-transform duration-200 ${isModulesOpen ? 'rotate-180' : ''}`}
@@ -73,35 +80,57 @@ const Sidebar = () => {
               )}
             </button>
 
-            {/* Smooth Accordion */}
-            <div
-              ref={contentRef}
-              style={{
-                height: isModulesOpen && isOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
-              }}
-              className='overflow-hidden transition-all duration-300 ease-in-out'
-            >
+            {/* Katta holatda accordion */}
+            {isOpen && (
+              <div
+                ref={contentRef}
+                style={{
+                  height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
+                }}
+                className='overflow-hidden transition-all duration-300 ease-in-out'
+              >
+                <div className='space-y-2 pt-1'>
+                  {moduleSubItems.map((sub) => (
+                    <NavLink
+                      key={sub.id}
+                      to={`/modules/${sub.id}`}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2 rounded-lg px-4 py-2 text-base transition hover:bg-[#F0F7FF] ${
+                          isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <Checkbox checked={isActive} className='my-custom-checkbox' />
+                          <span>{sub.name}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Kichik holatda oddiy ID list */}
+            {!isOpen && isModulesOpen && (
               <div className='space-y-2 pt-1'>
                 {moduleSubItems.map((sub) => (
                   <NavLink
                     key={sub.id}
                     to={`/modules/${sub.id}`}
+                    onClick={() => setIsModulesOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 rounded-lg px-4 py-2 text-base transition hover:bg-[#F0F7FF] ${
+                      `text-md flex items-center justify-center rounded-lg py-1 transition hover:bg-[#F0F7FF] ${
                         isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
                       }`
                     }
                   >
-                    {({ isActive }) => (
-                      <>
-                        <Checkbox checked={isActive} className='my-custom-checkbox' />
-                        <span>{sub.name}</span>
-                      </>
-                    )}
+                    {sub.id}
                   </NavLink>
                 ))}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Profil */}
@@ -128,12 +157,12 @@ const Sidebar = () => {
               </p>
             </NavLink>
 
-            <div className='flex items-center justify-end px-3'>
+            {/* <div className='flex items-center justify-end px-3'>
               <ArrowLeftToLine
                 className={`cursor-pointer duration-200 ${!isOpen && 'rotate-180'}`}
                 onClick={() => setIsOpen(!isOpen)}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </nav>
