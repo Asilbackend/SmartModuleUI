@@ -5,6 +5,32 @@ import { useState } from 'react';
 const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const [activeTab, setActiveTab] = useState('done');
+
+  const doneModules = [
+    { id: 1, title: '1. Universitet tarixi va tashkiliy tuzilmasi', percent: 60 },
+    { id: 2, title: '2. Universitet tarixi va tashkiliy tuzilmasi', percent: 80 },
+  ];
+
+  const newModules = [
+    { id: 1, title: '1. Yangi modul', percent: 0 },
+    { id: 2, title: '2. Yangi modul', percent: 0 },
+    { id: 3, title: '3. Yangi modul', percent: 0 },
+    { id: 4, title: '4. Yangi modul', percent: 0 },
+  ];
+
+  const unFinishedModules = [
+    { id: 1, title: '1. Tugatilmagan modul', percent: 30 },
+    { id: 2, title: '2. Tugatilmagan modul', percent: 50 },
+  ];
+
+  const getModules = () => {
+    if (activeTab === 'done') return doneModules;
+    if (activeTab === 'new') return newModules;
+    if (activeTab === 'unfinished') return unFinishedModules;
+    return [];
+  };
+
   const handleClick = () => {
     setIsOpen(true);
   };
@@ -98,91 +124,89 @@ const ProfilePage = () => {
         </div>
 
         <div className='col-span-12 md:col-span-6 lg:col-span-7'>
-          {/* Card 1 */}
-          <div className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'>
-            <div className='mb-8 flex flex-col gap-4 md:flex-row md:items-start'>
-              <div className='flex-1'>
-                <h2 className='mb-2 text-xl font-semibold md:text-2xl'>
-                  1. Universitet tarixi va tashkiliy tuzilmasi (Required)
-                </h2>
-                <p className='text-base md:text-lg'>
-                  Universitetning istiqbolli yo’nalishlari (Matn)
-                </p>
-              </div>
-              <div className='flex flex-col items-start gap-2 md:ml-auto md:items-end'>
-                <Button
-                  type='primary'
-                  icon={<Check strokeWidth={1.5} />}
-                  size='large'
-                  iconPosition='end'
-                  ghost
-                >
-                  Tugallangan
-                </Button>
-                <Button
-                  onClick={handleClick}
-                  type='primary'
-                  icon={<Eye strokeWidth={1.5} />}
-                  size='large'
-                  iconPosition='end'
-                >
-                  Sertifikatni ko‘rish
-                </Button>
-              </div>
-            </div>
-            <Flex gap='small' vertical>
-              <Progress
-                percent={60}
-                percentPosition={{ align: 'center', type: 'inner' }}
-                style={{ width: '100%' }}
-                strokeWidth={20}
-                strokeColor='#008CFF'
-              />
-            </Flex>
+          {/* Tabs */}
+          <div className='mt-12 flex justify-between rounded-2xl bg-white px-4 py-2 shadow-xs'>
+            <button
+              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
+                activeTab === 'done'
+                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
+                  : 'border-transparent text-gray-600'
+              }`}
+              onClick={() => setActiveTab('done')}
+            >
+              Tugallangan modullar
+            </button>
+
+            <button
+              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
+                activeTab === 'new'
+                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
+                  : 'border-transparent text-gray-600'
+              }`}
+              onClick={() => setActiveTab('new')}
+            >
+              Yangi modullar
+            </button>
+
+            <button
+              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
+                activeTab === 'unfinished'
+                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
+                  : 'border-transparent text-gray-600'
+              }`}
+              onClick={() => setActiveTab('unfinished')}
+            >
+              Tugallanmagan modullar
+            </button>
           </div>
 
-          {/* Card 2 */}
-          <div className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'>
-            <div className='mb-8 flex flex-col gap-4 md:flex-row md:items-start'>
-              <div className='flex-1'>
-                <h2 className='mb-2 text-xl font-semibold md:text-2xl'>
-                  2. Universitet tarixi va tashkiliy tuzilmasi (Required)
-                </h2>
-                <p className='text-base md:text-lg'>
-                  Universitetning istiqbolli yo’nalishlari (Matn)
-                </p>
+          {/* Cards */}
+          {getModules().map((modul) => (
+            <div
+              key={modul.id}
+              className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'
+            >
+              <div className='mb-8 flex flex-col gap-4 md:flex-row md:items-start'>
+                <div className='flex-1'>
+                  <h2 className='mb-2 text-xl font-semibold md:text-2xl'>
+                    {modul.title} (Required)
+                  </h2>
+                  <p className='text-base md:text-lg'>
+                    Universitetning istiqbolli yo’nalishlari (Matn)
+                  </p>
+                </div>
+                <div className='flex flex-col items-start gap-2 md:ml-auto md:items-end'>
+                  <Button
+                    type='primary'
+                    icon={<Check strokeWidth={1.5} />}
+                    size='large'
+                    iconPosition='end'
+                    ghost
+                  >
+                    Tugallangan
+                  </Button>
+                  <Button
+                    type='primary'
+                    icon={<Eye strokeWidth={1.5} />}
+                    size='large'
+                    iconPosition='end'
+                    onClick={handleClick}
+                  >
+                    Sertifikatni ko‘rish
+                  </Button>
+                </div>
               </div>
-              <div className='flex flex-col items-start gap-2 md:ml-auto md:items-end'>
-                <Button
-                  type='primary'
-                  icon={<Check strokeWidth={1.5} />}
-                  size='large'
-                  iconPosition='end'
-                  ghost
-                >
-                  Tugallangan
-                </Button>
-                <Button
-                  onClick={handleClick}
-                  type='primary'
-                  icon={<Eye strokeWidth={1.5} />}
-                  size='large'
-                  iconPosition='end'
-                >
-                  Sertifikatni ko‘rish
-                </Button>
-              </div>
+              <Flex gap='small' vertical>
+                <Progress
+                  percent={modul.percent}
+                  percentPosition={{ align: 'center', type: 'inner' }}
+                  style={{ width: '100%' }}
+                  strokeWidth={20}
+                  strokeColor='#008CFF'
+                />
+              </Flex>
             </div>
-            <Flex gap='small' vertical>
-              <Progress
-                percent={80}
-                percentPosition={{ align: 'center', type: 'inner' }}
-                style={{ width: '100%' }}
-                strokeWidth={20}
-                strokeColor='#008CFF'
-              />
-            </Flex>
-          </div>
+          ))}
         </div>
 
         {isOpen && (

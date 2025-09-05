@@ -42,7 +42,7 @@ export default function ModuleList() {
 
   return (
     <div className='py-3 sm:px-4 sm:py-6 md:px-8'>
-      <div className='mb-4 rounded-2xl bg-white p-4 shadow-sm sm:mb-6 sm:p-6'>
+      <div className='mb-4 rounded-2xl bg-[#008CFF0A] p-4 sm:mb-6 sm:p-6'>
         <h2 className='mb-4 text-2xl font-semibold'>Modullar video va matnlardan iborat.</h2>
         <p className='text-gray-700'>
           Har bir modulda bo‘limlar, bo‘limlarda esa darslar ketma-ketlikda.

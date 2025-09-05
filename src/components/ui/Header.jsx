@@ -29,6 +29,7 @@ const Header = () => {
   const [selectedLang, setSelectedLang] = useState('UZ');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [pushOpen, setpushOpen] = useState(false);
   const [isModulesOpen, setIsModulesOpen] = useState(false);
   const contentRef = useRef(null);
 
@@ -77,8 +78,25 @@ const Header = () => {
               </div>
             </Dropdown>
 
-            <Bell className='text-[22px] text-[#172243]' />
+            <Bell
+              onClick={() => setpushOpen(true)}
+              className='cursor-pointer text-[22px] text-[#172243]'
+            />
 
+            {/* Notification */}
+            {pushOpen && (
+              <div className='fixed top-16 right-14 z-50 w-80 rounded-lg bg-white p-4 shadow-sm'>
+                <div className='mb-2 flex items-center justify-between'>
+                  <span className='font-semibold text-[#172243]'>Push Notifications</span>
+                  <button className='cursor-pointer' onClick={() => setpushOpen(false)}>
+                    <X size={20} className='text-gray-700' />
+                  </button>
+                </div>
+                <div className='text-sm text-gray-600'>
+                  Sizda yangi bildirishnomalar mavjud emas
+                </div>
+              </div>
+            )}
             {/* MOBILE SIDEBAR */}
             <div
               className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ${
