@@ -1,6 +1,7 @@
 import { Steps } from 'antd';
+import { BookOpenText, TvMinimalPlay } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { modules } from '../../data/moduleData';
 
@@ -51,9 +52,14 @@ export default function ModuleList() {
 
       {mod.sections.map((section) => (
         <div key={section.id} className='mb-8 rounded-2xl bg-white p-4 shadow-sm sm:p-6'>
-          <h2 className='mb-4 text-2xl font-semibold text-blue-900'>
-            {section.id}. {section.title}
-          </h2>
+          <div className='mb-8 flex items-center justify-between'>
+            <h2 className='text-2xl font-semibold text-blue-900'>
+              {section.id}. {section.title}
+            </h2>
+            <span className='rounded-2xl bg-[#FF00001A] px-4 py-0.5 text-[#FF0000]'>
+              {section.type}
+            </span>
+          </div>
 
           <Steps
             direction='vertical'
@@ -62,19 +68,36 @@ export default function ModuleList() {
               // title: item.title,
               description: (
                 <div className='mb-2 flex items-center justify-between gap-1'>
-                  <div className='flex flex-col'>
-                    <h3 className='text-[16px]'>{item.title}</h3>
-                    <div className='flex gap-2 text-gray-500'>
-                      <p className='text-sm'>{item.type}</p>
-                      <p className='text-sm'>{item.duration}</p>
+                  <div className='flex items-start gap-3'>
+                    <div className='min-w-[30px]'>
+                      {item.type === 'video' ? (
+                        <TvMinimalPlay size={32} />
+                      ) : (
+                        <BookOpenText size={32} />
+                      )}
+                    </div>
+                    <div className='flex max-w-[200px] flex-col md:max-w-full'>
+                      <h3 className='line-clamp-2 text-[16px] md:text-[20px]'>{item.text}</h3>
+                      <div className='flex gap-2 text-gray-500'>
+                        <p className='text-[16px]'>{item.type}</p>
+                        <p className='text-[16px]'>{item.duration}</p>
+                      </div>
                     </div>
                   </div>
-                  {index <= currentSteps[section.id] && (
+                  {index == currentSteps[section.id] && (
                     <button
                       onClick={() => handleStepClick(section.id, index, item)}
-                      className='rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'
+                      className='cursor-pointer rounded-lg bg-blue-600 px-5.5 py-2 text-white hover:bg-blue-700'
                     >
-                      Ko‘rish
+                      Boshlash
+                    </button>
+                  )}
+                  {index < currentSteps[section.id] && (
+                    <button
+                      onClick={() => handleStepClick(section.id, index, item)}
+                      className='cursor-pointer rounded-lg bg-[#F0F7FF] px-3 py-2 text-[#008CFF]'
+                    >
+                      Tugallangan
                     </button>
                   )}
                 </div>
@@ -83,6 +106,12 @@ export default function ModuleList() {
           />
         </div>
       ))}
+
+      <Link to={`/modules/${mod.id}/test`}>
+        <button className='mb-12 w-full cursor-pointer rounded-xl bg-[#008CFF] px-5.5 py-3 text-lg font-semibold text-white'>
+          O‘zingizni sinab ko’ring
+        </button>
+      </Link>
     </div>
   );
 }

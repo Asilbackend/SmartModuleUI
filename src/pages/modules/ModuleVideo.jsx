@@ -55,7 +55,7 @@ export default function ModuleVideo() {
         </video>
         <div className='flex flex-wrap items-center justify-between px-5 py-1 md:py-4'>
           <h2 className='mb-2 text-[22px] font-semibold sm:text-2xl xl:text-3xl'>
-            {foundVideo.title}
+            {foundVideo.text}
           </h2>
           <div>
             <Rate style={{ fontSize: 26 }} />

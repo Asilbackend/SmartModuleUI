@@ -17,6 +17,7 @@ import ModuleVideo from './pages/modules/ModuleVideo';
 import News from './pages/news/News';
 import NewsList from './pages/news/NewsList';
 import ProfilePage from './pages/profile/ProfilePage';
+import TestComponent from './pages/test/Test.jsx';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('accessToken');
@@ -35,6 +36,7 @@ const App = () => {
           <Route path='/modules' element={<Contents />} />
           <Route path='/modules/:id' element={<ModulesList />} />
           <Route path='/modules/:moduleId/video/:videoId' element={<ModuleVideo />} />
+          <Route path='/modules/:moduleId/test' element={<TestComponent />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/news' element={<News />}>
             <Route index element={<NewsList />} />
