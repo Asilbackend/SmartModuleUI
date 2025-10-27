@@ -1,8 +1,8 @@
-import axiosClient from '@components/service/axiosClient.js';
 import { Button, Input, message } from 'antd';
 import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import axiosClient from 'src/service/axiosClient';
 
 const ruleLogin = {
   required: "Login maydoni to'ldirilishi shart!",
@@ -44,7 +44,7 @@ const LoginForm = () => {
   // };
   // utils/checkToken.js
   function isJwtValid(token) {
-    if (!token) return false;
+    if (!token || token.split('.').length < 3) return false;
     try {
       const payloadBase64 = token.split('.')[1];
       const decodedPayload = JSON.parse(atob(payloadBase64));

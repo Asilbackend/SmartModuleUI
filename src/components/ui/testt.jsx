@@ -1,8 +1,6 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
-import { Checkbox, Spin } from 'antd';
+import { Checkbox } from 'antd';
 import { ArrowLeftToLine, ChevronDown, House, Layers, University, UserRound } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { getAllMoudles } from 'src/api/modules.api';
 
@@ -10,22 +8,43 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isModulesOpen, setIsModulesOpen] = useState(false);
   const contentRef = useRef(null);
+  const [modules, setModules] = useState([]); // ✅ Bo'sh array
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const otherNavItems = [
     { name: 'Bosh sahifa', href: '/home', icon: <House /> },
     { name: 'Marifat darslari', href: '/enlightenment', icon: <University /> },
   ];
 
-  const { data, isPending, error } = useQuery({
-    queryKey: ['modules'],
-    queryFn: async () => {
+  // ✅ Modullarni yuklash
+  async function fetchModules() {
+    try {
+      setLoading(true);
+      setError(null);
       const response = await getAllMoudles();
-      console.log('API Response:', response.data);
-      return response.data.content || [];
-    },
-  });
 
-  const modules = data || [];
+      console.log('API Response:', response.data);
+
+      // API response: { content: [...], pageable: {...} }
+      if (response.data?.content && Array.isArray(response.data.content)) {
+        setModules(response.data.content);
+      } else {
+        console.error('Unexpected API response format:', response.data);
+        setModules([]);
+      }
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+      setError(error.message);
+      setModules([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
 
   return (
     <aside className={`h-screen duration-200 ${isOpen ? 'w-64' : 'w-20'}`}>
@@ -98,25 +117,23 @@ const Sidebar = () => {
                 className='overflow-hidden transition-all duration-300 ease-in-out'
               >
                 <div className='space-y-2 pt-1'>
-                  {isPending && (
-                    <span className='flex justify-center px-4 py-2'>
-                      <Spin indicator={<LoadingOutlined spin />} />
-                    </span>
-                  )}
+                  {/* ✅ Loading holati */}
+                  {loading && <p className='px-4 py-2 text-sm text-gray-500'>Yuklanmoqda...</p>}
 
-                  {error && <p className='px-4 py-2 text-sm text-red-500'>Xatolik</p>}
+                  {/* ✅ Error holati */}
+                  {error && <p className='px-4 py-2 text-sm text-red-500'>Xatolik: {error}</p>}
 
-                  {!isPending && !error && modules.length === 0 && (
+                  {/* ✅ Modullarni ko'rsatish */}
+                  {!loading && !error && modules.length === 0 && (
                     <p className='px-4 py-2 text-sm text-gray-500'>Modullar topilmadi</p>
                   )}
 
-                  {!isPending &&
+                  {!loading &&
                     !error &&
                     modules.length > 0 &&
                     modules.map((mod) => (
                       <NavLink
                         key={mod.id}
-                        state={{ title: mod.name, desc: mod.description }}
                         to={`/modules/${mod.id}`}
                         className={({ isActive }) =>
                           `flex items-center gap-2 rounded-lg px-4 py-2 text-base transition hover:bg-[#F0F7FF] ${
@@ -127,7 +144,7 @@ const Sidebar = () => {
                         {({ isActive }) => (
                           <>
                             <Checkbox checked={isActive} className='my-custom-checkbox' />
-                            <span>{mod.name}</span>
+                            <span>{mod.name || mod.title || `Modul ${mod.id}`}</span>
                           </>
                         )}
                       </NavLink>
@@ -136,26 +153,23 @@ const Sidebar = () => {
               </div>
             )}
 
+            {/* Kichik holatda oddiy ID list */}
             {!isOpen && isModulesOpen && (
               <div className='space-y-2 pt-1'>
-                {isPending ? (
-                  <p className='text-center text-sm'>...</p>
-                ) : (
-                  modules.map((mod) => (
-                    <NavLink
-                      key={mod.id}
-                      to={`/modules/${mod.id}`}
-                      onClick={() => setIsModulesOpen(false)}
-                      className={({ isActive }) =>
-                        `text-md flex items-center justify-center rounded-lg py-1 transition hover:bg-[#F0F7FF] ${
-                          isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
-                        }`
-                      }
-                    >
-                      {mod.id}
-                    </NavLink>
-                  ))
-                )}
+                {modules.map((mod) => (
+                  <NavLink
+                    key={mod.id}
+                    to={`/modules/${mod.id}`}
+                    onClick={() => setIsModulesOpen(false)}
+                    className={({ isActive }) =>
+                      `text-md flex items-center justify-center rounded-lg py-1 transition hover:bg-[#F0F7FF] ${
+                        isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
+                      }`
+                    }
+                  >
+                    {mod.id}
+                  </NavLink>
+                ))}
               </div>
             )}
           </div>

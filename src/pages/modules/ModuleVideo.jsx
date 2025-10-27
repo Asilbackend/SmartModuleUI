@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { modules } from '../../data/moduleData';
+// import { useQuery } from '@tanstack/react-query';
+// import { getVideoComments } from 'src/api/module-content-controller.api';
 
 export default function ModuleVideo() {
   const { moduleId, videoId } = useParams();
@@ -42,6 +44,15 @@ export default function ModuleVideo() {
     setComments(comments.filter((c) => c.id !== id));
   };
 
+  // const { data, isPending, error } = useQuery({
+  //   queryKey: ['videoComments', videoId],
+  //   queryFn: asinc () => {
+  //     const res = await getVideoComments(videoId);
+  //     return res.data || [];
+  //   },
+  //   enabled: !!videoId,
+  // })
+
   return (
     <div className='mx-auto max-w-6xl space-y-4 p-2 sm:space-y-8 lg:space-y-12'>
       <div className='rounded-3xl bg-white shadow-xs'>
@@ -63,6 +74,8 @@ export default function ModuleVideo() {
           </div>
         </div>
       </div>
+
+      {/* Comments Section */}
 
       <div className='rounded-3xl bg-white p-4 shadow-xs'>
         <h3 className='mb-4 text-xl font-semibold'>Fikrlar</h3>

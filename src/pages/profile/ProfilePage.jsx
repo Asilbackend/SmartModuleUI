@@ -134,7 +134,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab('done')}
             >
-              Tugallangan modullar
+              COMPLETED
             </button>
 
             <button
@@ -145,7 +145,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab('new')}
             >
-              Yangi modullar
+              FAILED
             </button>
 
             <button
@@ -156,7 +156,7 @@ const ProfilePage = () => {
               }`}
               onClick={() => setActiveTab('unfinished')}
             >
-              Tugallanmagan modullar
+              IN PROGRESS
             </button>
           </div>
 
