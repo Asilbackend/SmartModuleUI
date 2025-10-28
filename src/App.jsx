@@ -46,6 +46,7 @@ const App = () => {
             <Route path=':id' element={<CertificatesDetail />} />
           </Route>
         </Route>
+        <Route path='*' element={<NotFound />} />
       </Route>
       <Route path='*' element={<NotFound />} />
     </Routes>

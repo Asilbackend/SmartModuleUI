@@ -1,5 +1,6 @@
+import FullScreenLoader from '@components/ui/FullScreenLoader.jsx';
 import { Button, Input, message } from 'antd';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from 'src/service/axiosClient';
@@ -26,6 +27,7 @@ const ruleParol = {
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const [checkingAuth, setCheckingAuth] = useState(false);
 
   const {
     control,
@@ -60,12 +62,14 @@ const LoginForm = () => {
     const checkToken = async () => {
       const accessToken = localStorage.getItem('accessToken');
       if (isJwtValid(accessToken)) {
+        setCheckingAuth(false);
         navigate('/home');
         return;
       }
 
       const refreshToken = localStorage.getItem('refreshToken');
       if (!isJwtValid(refreshToken)) {
+        setCheckingAuth(false);
         localStorage.clear();
         return;
       }
@@ -77,10 +81,13 @@ const LoginForm = () => {
 
         const accessToken = res.data?.accessToken;
         localStorage.setItem('accessToken', accessToken);
+        setCheckingAuth(false);
         navigate('/home');
       } catch (error) {
         localStorage.clear();
         console.error('Refresh token xato:', error);
+      } finally {
+        setCheckingAuth(false);
       }
     };
 
@@ -89,6 +96,7 @@ const LoginForm = () => {
 
   const formSubmitHandler = async (data) => {
     try {
+      setCheckingAuth(true);
       const res = await axiosClient.post('/auth/login', {
         login: data.login,
         password: data.parol,
@@ -99,18 +107,22 @@ const LoginForm = () => {
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
+        setCheckingAuth(false);
         message.success('Muvaffaqiyatli login qilindi!');
         navigate('/home');
       } else {
+        setCheckingAuth(false);
         message.error('Token qaytmadi. Login muvaffaqiyatsiz.');
       }
     } catch (error) {
-      console.error(error);
-      const msg = error?.response?.data?.message || 'Login yoki parolda xatolik!';
-      message.error(msg);
+      message.error('Login yoki parolda xatolik!');
+    } finally {
+      setCheckingAuth(false);
     }
   };
-
+  if (checkingAuth) {
+    return <FullScreenLoader />;
+  }
   return (
     <form
       onSubmit={handleSubmit(formSubmitHandler)}

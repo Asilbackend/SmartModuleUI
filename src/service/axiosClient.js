@@ -31,7 +31,7 @@ axiosClient.interceptors.response.use(
     const originalRequest = error.config;
 
     // 401 bo‘lsa tokenni yangilash
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login') {
       originalRequest._retry = true;
 
       try {
