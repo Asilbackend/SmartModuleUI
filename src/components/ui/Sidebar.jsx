@@ -1,7 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Checkbox, Spin } from 'antd';
-import { ArrowLeftToLine, ChevronDown, House, Layers, University, UserRound } from 'lucide-react';
+import { ArrowLeftToLine, BookCheck, ChevronDown, House, Layers, UserRound } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { getAllMoudles } from 'src/api/modules.api';
@@ -13,7 +13,7 @@ const Sidebar = () => {
 
   const otherNavItems = [
     { name: 'Bosh sahifa', href: '/home', icon: <House /> },
-    { name: 'Marifat darslari', href: '/enlightenment', icon: <University /> },
+    { name: 'Marifat darslari', href: '/enlightenment', icon: <BookCheck /> },
   ];
 
   const { data, isPending, error } = useQuery({
@@ -65,7 +65,7 @@ const Sidebar = () => {
           <div>
             <button
               onClick={() => setIsModulesOpen(!isModulesOpen)}
-              className='group relative flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF]'
+              className='group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF]'
             >
               <span className='text-xl'>
                 <Layers />
@@ -94,8 +94,10 @@ const Sidebar = () => {
                 ref={contentRef}
                 style={{
                   height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
+                  maxHeight: isModulesOpen ? '380px' : '0px',
+                  overflowY: 'auto',
                 }}
-                className='overflow-hidden transition-all duration-300 ease-in-out'
+                className='custom-scroll overflow-hidden scroll-auto transition-all duration-300 ease-in-out'
               >
                 <div className='space-y-2 pt-1'>
                   {isPending && (
@@ -119,7 +121,7 @@ const Sidebar = () => {
                         state={{ title: mod.name, desc: mod.description }}
                         to={`/modules/${mod.id}`}
                         className={({ isActive }) =>
-                          `flex items-center gap-2 rounded-lg px-4 py-2 text-base transition hover:bg-[#F0F7FF] ${
+                          `mr-2 flex items-center gap-2 rounded-lg px-3 py-2 text-base transition hover:bg-[#F0F7FF] ${
                             isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
                           }`
                         }

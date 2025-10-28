@@ -42,7 +42,6 @@ export default function ModuleList() {
     }
   }, [moduleData, STORAGE_KEY]);
 
-  // 4️⃣ Step bosilganda yangilash
   const handleStepClick = (sectionId, index, item) => {
     if (index === currentSteps[sectionId]) {
       const updated = { ...currentSteps, [sectionId]: currentSteps[sectionId] + 1 };
@@ -50,11 +49,9 @@ export default function ModuleList() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     }
 
-    // Video sahifasiga o‘tish
     navigate(`/modules/${id}/video/${item.attachmentId}`);
   };
 
-  // 5️⃣ Loading va Error holatlari
   if (isPending) return <div className='p-8 text-lg'>Yuklanmoqda...</div>;
   if (error) return <div className='p-8 text-red-500'>Xatolik: {error.message}</div>;
   if (!moduleData.length) return <div className='p-8'>Ma’lumot topilmadi</div>;

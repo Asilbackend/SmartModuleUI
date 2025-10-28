@@ -1,6 +1,6 @@
 import 'swiper/css';
 
-import Breadcrumbs from '@components/ui/Breadcrumbs';
+// import Breadcrumbs from '@components/ui/Breadcrumbs';
 import Header from '@components/ui/Header';
 import Sidebar from '@components/ui/Sidebar';
 import StoryCircle from '@components/ui/StoryCircle';
@@ -49,8 +49,8 @@ const MainLayout = () => {
               <div className='pointer-events-none absolute top-0 right-0 z-10 h-full w-20 bg-gradient-to-r from-transparent to-white sm:w-40'></div>
             </div>
           )}
-          <div className='flex flex-col gap-2 px-4 pt-3 pb-12 md:px-12'>
-            <Breadcrumbs />
+          <div className='flex flex-col gap-2 px-4 pt-3 pb-1 md:px-12'>
+            {/* <Breadcrumbs /> */}
             <Outlet />
           </div>
         </main>
