@@ -1,5 +1,3 @@
-import React from 'react';
-
 function NewsVideo({ video, title, subtitle }) {
   return (
     <div className='mr-auto w-auto max-w-[1035px] overflow-hidden rounded-xl bg-white shadow-md'>

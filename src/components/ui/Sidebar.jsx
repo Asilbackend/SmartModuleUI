@@ -20,7 +20,6 @@ const Sidebar = () => {
     queryKey: ['modules'],
     queryFn: async () => {
       const response = await getAllMoudles();
-      console.log('API Response:', response.data);
       return response.data.content || [];
     },
   });

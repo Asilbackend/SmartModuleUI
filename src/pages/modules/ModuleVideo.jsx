@@ -6,15 +6,17 @@ import { useParams } from 'react-router-dom';
 import { VideoImg } from 'src/api/attachment-controller.api';
 import {
   addVideoComment,
+  deleteVideoComment,
   getVideoComments,
   getVideoRate,
   postVideoRate,
-} from 'src/api/module-video-controller.api';
-
-import { modules } from '../../data/moduleData';
+  updateVideoComment,
+} from 'src/api/content-video-controller.api';
 
 export default function ModuleVideo() {
   const [newComment, setNewComment] = useState('');
+  const [editId, setEditId] = useState(null);
+  const [editComment, setEditComment] = useState('');
   const { moduleId, videoId } = useParams();
   const queryClient = useQueryClient();
 
@@ -64,14 +66,23 @@ export default function ModuleVideo() {
     },
   });
 
-  const mod = modules.find((m) => m.id === Number(moduleId));
-  if (!mod) return <div className='p-8'>Modul topilmadi</div>;
+  // Delete comment mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId) => deleteVideoComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['videoComments', videoId]);
+    },
+  });
 
-  const foundVideo = mod.sections
-    .flatMap((section) => section.items)
-    .find((item) => item.id === Number(videoId));
-
-  if (!foundVideo) return <div className='p-8'>Video topilmadi</div>;
+  //Update comment mutation
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ updComment, commentId }) => updateVideoComment(updComment, commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['videoComments', videoId]);
+      setEditId(null);
+      setEditComment('');
+    },
+  });
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
@@ -79,7 +90,7 @@ export default function ModuleVideo() {
   };
 
   return (
-    <div className='mx-auto max-w-6xl space-y-4 p-2 sm:space-y-8 lg:space-y-12'>
+    <div className='mx-auto min-w-5xl space-y-4 p-2 sm:space-y-8 lg:space-y-12'>
       {/* Video */}
       <div className='rounded-3xl bg-white shadow-xs'>
         <video
@@ -96,17 +107,16 @@ export default function ModuleVideo() {
 
         <div className='flex flex-wrap items-center justify-between px-5 py-1 md:py-4'>
           <h2 className='mb-2 text-[22px] font-semibold sm:text-2xl xl:text-3xl'>
-            {foundVideo.text}
+            {/* {foundVideo.text} */} Lorem ipsum dolor sit amet.
           </h2>
           <div>
             <Rate
               value={getRate.data?.userVideoRating || 0}
               onChange={(value) => videoRateMutation.mutate(value)}
-              disabled={getRate.data?.userVideoRating !== null}
+              disabled={Boolean(getRate.data?.userVideoRating)}
               style={{ fontSize: 26 }}
             />
             <p className='font-semibold sm:text-center sm:text-lg'>Videoni baholash</p>
-            {getRate && getRate?.userVideoRating}
           </div>
         </div>
       </div>
@@ -144,8 +154,8 @@ export default function ModuleVideo() {
         )}
 
         {comments.map((c) => (
-          <div key={c.id} className='flex items-start gap-3 border-t pt-4'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 font-bold text-white'>
+          <div key={c.id} className='flex items-start gap-3 border-t py-4'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 font-bold text-white select-none'>
               {(c.firstName?.[0] || '') + (c.lastName?.[0] || '')}
             </div>
             <div className='flex-1'>
@@ -153,7 +163,65 @@ export default function ModuleVideo() {
                 <p className='font-semibold'>{c.firstName}</p>
                 <p className='font-semibold'>{c.lastName}</p>
               </div>
-              <p>{c.comment}</p>
+              {editId === c.commentId ? (
+                <div className='flex gap-2'>
+                  <input
+                    className='flex-1 rounded-md border px-3 py-1'
+                    type='text'
+                    value={editComment}
+                    onChange={(e) => setEditComment(e.target.value)}
+                  />
+                  <button
+                    disabled={editId == c.commentId && updateCommentMutation.isPending}
+                    className='bg-green-600 px-3 py-1 text-white hover:bg-green-700'
+                    onClick={() => {
+                      if (editComment.trim() === c.comment.trim()) {
+                        setEditId(null);
+                        setEditComment('');
+                        return;
+                      }
+
+                      updateCommentMutation.mutate({ updComment: editComment, commentId: editId });
+                    }}
+                  >
+                    saqlash
+                  </button>
+                  <button
+                    className='bg-gray-300 px-3 py-1 hover:bg-gray-400'
+                    onClick={() => {
+                      setEditId(null);
+                      setEditComment('');
+                    }}
+                  >
+                    Bekor qilish
+                  </button>
+                </div>
+              ) : (
+                <p>{c.comment}</p>
+              )}
+            </div>
+            <div className='my-auto'>
+              {c.own && editId !== c.commentId && (
+                <div>
+                  <button
+                    className='mr-2 cursor-pointer rounded-md bg-gray-400 px-3 py-1 text-sm font-medium text-white hover:bg-gray-500 disabled:opacity-50'
+                    onClick={() => {
+                      setEditId(c.commentId);
+                      setEditComment(c.comment);
+                    }}
+                  >
+                    edit
+                  </button>
+                  <button
+                    className='cursor-pointer rounded-md bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50'
+                    onClick={() => {
+                      deleteCommentMutation.mutate(c.commentId);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}

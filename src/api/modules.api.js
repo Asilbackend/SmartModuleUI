@@ -2,7 +2,7 @@ import axiosClient from '../service/axiosClient';
 
 export const getAllMoudles = () => axiosClient.get('/student/module-content/module');
 export const getModuleById = (id) =>
-  axiosClient.get(`https://dev.anvarovich.uz/api/student/module-content/findContents-byModuleId`, {
+  axiosClient.get(`/student/module-content/findContents-byModuleId`, {
     params: { moduleId: id },
   });
 // export const createUser = (data: any) => axiosClient.post('/users', data);
