@@ -1,8 +1,18 @@
 import { Checkbox, Dropdown, Input } from 'antd';
-import { Bell, ChevronDown, House, Layers, Menu, University, UserRound, X } from 'lucide-react';
+import {
+  Bell,
+  ChevronDown,
+  House,
+  Layers,
+  LogOut,
+  Menu,
+  University,
+  UserRound,
+  X,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import logo from '@/assets/logo.svg';
 
@@ -33,12 +43,19 @@ const Header = () => {
   const [isModulesOpen, setIsModulesOpen] = useState(false);
   const contentRef = useRef(null);
 
+  const navigate = useNavigate();
+
   const handleMenuClick = (e) => {
     const selectedItem = items.find((item) => item.key === e.key);
     if (selectedItem) {
       setSelectedLang(selectedItem.label);
     }
     setDropdownOpen(false);
+  };
+
+  const logOut = () => {
+    localStorage.clear();
+    navigate('/');
   };
 
   return (
@@ -78,10 +95,9 @@ const Header = () => {
               </div>
             </Dropdown>
 
-            <Bell
-              onClick={() => setpushOpen(true)}
-              className='cursor-pointer text-[22px] text-[#172243]'
-            />
+            <Bell size={23} onClick={() => setpushOpen(true)} className='cursor-pointer' />
+
+            <LogOut onClick={() => logOut()} size={22} className='cursor-pointer' />
 
             {/* Notification */}
             {pushOpen && (
@@ -97,6 +113,7 @@ const Header = () => {
                 </div>
               </div>
             )}
+
             {/* MOBILE SIDEBAR */}
             <div
               className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ${
@@ -149,10 +166,10 @@ const Header = () => {
 
                   <div
                     ref={contentRef}
+                    className={`overflow-hidden transition-all duration-200 ease-in-out`}
                     style={{
-                      height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
+                      maxHeight: isModulesOpen ? contentRef.current?.scrollHeight : 0,
                     }}
-                    className='overflow-hidden transition-all duration-200 ease-in-out'
                   >
                     <div className='space-y-2 pt-1'>
                       {moduleSubItems.map((sub) => (

@@ -1,12 +1,39 @@
-import { Heart, Volume2, VolumeX } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Eye, Heart, Share2, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { getNewsData, newsLike } from 'src/api/news-page-controller.api';
 
 export default function MobileVideoPlayer() {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const { storyId } = useParams();
+  const queryClient = useQueryClient();
+
+  const { data, error } = useQuery({
+    queryKey: ['NewsData', storyId],
+    queryFn: async () => {
+      const res = await getNewsData(storyId);
+      return res.data || {};
+    },
+    enabled: !!storyId,
+  });
+
+  const setLikeMutation = useMutation({
+    mutationFn: () => newsLike(storyId),
+    onSuccess: () => {
+      queryClient.setQueryData(['NewsData', storyId], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          likeCount: oldData.likeCount + (oldData.isLiked ? -1 : 1),
+          isLiked: !oldData.isLiked,
+        };
+      });
+    },
+  });
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -36,9 +63,27 @@ export default function MobileVideoPlayer() {
     setIsMuted(video.muted);
   };
 
-  const toggleLike = (e) => {
-    e.stopPropagation();
-    setLiked(!liked);
+  // Share funksiyasi
+  const handleShare = async () => {
+    const shareData = {
+      title: data?.title || 'Video',
+      text: data?.description || "Videoni ko'ring!",
+      url: window.location.href,
+    };
+
+    try {
+      // Agar brauzer Web Share API ni qo'llab-quvvatlasa
+      if (navigator.share) {
+        await navigator.share(shareData);
+        console.log('Video ulashildi!');
+      } else {
+        // Fallback: URLni clipboard ga nusxalash
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link nusxalandi! ✅');
+      }
+    } catch (err) {
+      console.error('Ulashishda xatolik:', err);
+    }
   };
 
   useEffect(() => {
@@ -57,64 +102,124 @@ export default function MobileVideoPlayer() {
     };
   }, []);
 
+  if (error) {
+    return (
+      <div className='flex h-screen items-center justify-center bg-gradient-to-br from-red-950 to-black'>
+        <div className='rounded-2xl border border-red-500/30 bg-red-500/20 px-6 py-4 backdrop-blur-xl'>
+          <div className='font-medium text-red-400'>⚠️ Xatolik: {error.message}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className='relative mx-auto aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg bg-black'>
+    <div className='relative mx-auto aspect-[9/16] w-full max-w-sm overflow-hidden bg-black shadow-2xl'>
       {/* Video */}
       <video
         ref={videoRef}
-        src='/123.mp4'
-        className='h-full w-full cursor-pointer bg-black object-contain'
+        src={data?.videoUrl}
+        className='h-full w-full cursor-pointer bg-black object-cover'
         onClick={togglePlay}
         onTimeUpdate={handleTimeUpdate}
       />
 
-      {/* Overlay Play */}
+      {/* Gradient Overlays */}
+      <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30' />
+
+      {/* Play button overlay with pulse animation */}
       {!isPlaying && (
         <div
-          className='absolute inset-0 flex items-center justify-center bg-black/30'
+          className='absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm'
           onClick={togglePlay}
         >
-          <svg
-            xmlns='/image.png'
-            className='h-16 w-16 text-white'
-            viewBox='0 0 24 24'
-            fill='currentColor'
-          >
-            <path d='M8 5v14l11-7z' />
-          </svg>
+          <div className='relative'>
+            <div className='absolute inset-0 animate-ping rounded-full bg-white/30' />
+            <div className='relative rounded-full bg-white/90 p-6 shadow-2xl backdrop-blur-sm transition-transform hover:scale-110'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                className='h-12 w-12 text-black'
+                viewBox='0 0 24 24'
+                fill='currentColor'
+              >
+                <path d='M8 5v14l11-7z' />
+              </svg>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Progress Bar */}
-      <div className='absolute top-0 left-0 h-1 w-full bg-white/20'>
-        <div className='h-full bg-blue-500' style={{ width: `${progress}%` }} />
+      {/* Modern Progress bar with glow */}
+      <div className='absolute top-0 left-0 h-1 w-full bg-white/10'>
+        <div
+          className='h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/50 transition-all duration-200'
+          style={{ width: `${progress}%` }}
+        />
       </div>
 
-      {/* Top Info */}
-      <div className='absolute top-4 left-4 text-white'>
-        <div className='flex items-center gap-2'>
-          <img src='/image.png' alt='Avatar' className='h-12 w-12 rounded-full' />
-          <div>
-            <span className='font-semibold'>Yoqubjonov Abubakir</span>
-            <div className='mt-1 text-xs opacity-80'>Video 2:55</div>
+      {/* Top Section - Title with glassmorphism */}
+      <div className='absolute top-4 right-4 left-4'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-2'>
+              <span className='inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90'>
+                <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-red-500' />
+                {data?.videoDuration}
+              </span>
+              <span className='inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90'>
+                <Eye size={16} />
+                <span className='text-xs'>{data?.seenCount}</span>
+              </span>
+            </div>
           </div>
+
+          {/* Mute button */}
+          <button
+            onClick={toggleMute}
+            className='rounded-full bg-white/10 p-2.5 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/20'
+          >
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
         </div>
       </div>
 
-      {/* Volume Button */}
-      <button
-        onClick={toggleMute}
-        className='absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white'
-      >
-        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-      </button>
-
-      {/* Bottom Actions */}
-      <div className='absolute bottom-4 left-0 w-full px-6 text-white'>
-        <button onClick={toggleLike} className='flex items-center gap-1'>
-          <Heart size={24} className={liked ? 'fill-red-500 stroke-red-500' : ''} />
-          <span>{liked ? 'Yoqdi' : 'Yoqmadi'}</span>
+      {/* Right Side Action Buttons - TikTok style */}
+      <div className='absolute right-3 bottom-28 flex flex-col gap-3'>
+        {/* Like */}
+        <button
+          onClick={() => setLikeMutation.mutate()}
+          className='group flex flex-col items-center gap-1'
+        >
+          <div
+            className={`rounded-full p-3 backdrop-blur-xl transition-all ${
+              data?.isLiked ? 'scale-110 bg-red-500/90' : 'bg-black/40 hover:bg-black/60'
+            }`}
+          >
+            <Heart
+              size={26}
+              className={`transition-all ${
+                data?.isLiked ? 'fill-white stroke-white' : 'stroke-white group-hover:scale-110'
+              }`}
+            />
+          </div>
+          <span className='text-xs font-bold text-white drop-shadow-lg'>{data?.likeCount}</span>
         </button>
+
+        {/* Share - ISHLATILADI */}
+        <button onClick={handleShare} className='group flex flex-col items-center gap-1'>
+          <div className='rounded-full bg-black/40 p-3 backdrop-blur-xl transition-all hover:scale-110 hover:bg-black/60 active:scale-95'>
+            <Share2 size={26} className='stroke-white transition-transform group-hover:rotate-12' />
+          </div>
+        </button>
+      </div>
+
+      {/* Bottom Section - Description */}
+      <div className='absolute right-0 bottom-0 left-0 px-4 pb-4'>
+        {data?.description && (
+          <div className='rounded-2xl border border-white/10 p-3 shadow-xl backdrop-blur-xl'>
+            <h2 className='mb-1.5 text-lg leading-tight font-bold text-white'>{data?.title}</h2>
+            <p className='line-clamp-3 text-sm leading-relaxed text-white/95'>{data.description}</p>
+          </div>
+        )}
       </div>
     </div>
   );

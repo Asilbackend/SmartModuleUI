@@ -39,7 +39,7 @@ const App = () => {
           <Route path='/modules/:moduleId/test' element={<TestComponent />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/news' element={<News />}>
-            <Route index element={<NewsList />} />
+            <Route path=':storyId' index element={<NewsList />} />
           </Route>
           <Route path='/certificates' element={<Certificates />}>
             <Route index element={<CertificatesList />} />
