@@ -206,7 +206,7 @@ export default function ModuleList() {
 
       <Link to={`/modules/${id}/test`}>
         <button className='mb-12 w-full cursor-pointer rounded-xl bg-[#008CFF] px-5.5 py-3 text-lg font-semibold text-white'>
-          Ozingizni sinab koring
+          O`zingizni sinab ko`ring
         </button>
       </Link>
     </div>
