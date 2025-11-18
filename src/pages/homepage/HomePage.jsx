@@ -10,30 +10,29 @@ const VideoCard = ({ title, desc, img, required }) => {
 
   return (
     <div className='group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98] sm:rounded-3xl'>
-      {/* Skeleton loading */}
-      {!loaded && !imageError && (
-        <div className='flex aspect-video w-full items-center justify-center rounded-2xl bg-gray-100 sm:rounded-3xl'>
-          <Skeleton.Image active={true} className='!h-full !w-full object-cover' />
-        </div>
-      )}
+      <div className='relative aspect-video w-full overflow-hidden rounded-2xl sm:rounded-3xl'>
+        {!loaded && !imageError && (
+          <div className='absolute inset-0 z-10'>
+            <Skeleton.Image active className='!h-full !w-full object-cover' />
+          </div>
+        )}
 
-      {/* Image */}
-      {loaded && !imageError && (
-        <div className='aspect-video w-full overflow-hidden rounded-2xl sm:rounded-3xl'>
+        {!imageError && (
           <img
-            src={imageError ? '/placeholder-image.jpg' : img}
+            src={img}
             alt={title}
-            className={`h-full w-full object-cover transition-all duration-500 ${
-              loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
-            } group-hover:scale-110`}
             onLoad={() => setLoaded(true)}
-            onError={() => {
-              setLoaded(true);
-              setImageError(true);
-            }}
+            onError={() => setImageError(true)}
+            className={`h-full w-full object-cover transition-all duration-500 ${loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-0'} `}
           />
-        </div>
-      )}
+        )}
+
+        {imageError && (
+          <div className='absolute inset-0 flex items-center justify-center rounded-2xl bg-gray-200 sm:rounded-3xl'>
+            <span className='text-gray-500'>Rasm yuklanmadi</span>
+          </div>
+        )}
+      </div>
 
       <div className='space-y-2 p-4 sm:space-y-3 sm:p-5'>
         <h3 className='line-clamp-2 text-base leading-tight font-semibold text-gray-900 sm:text-lg'>

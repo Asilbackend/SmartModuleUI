@@ -13,3 +13,11 @@ export const updateVideoComment = (updComment, commentId) =>
   axiosClient.put(
     `student/content-video/comment?commentId=${commentId}&updatedComment=${updComment}`
   );
+export const uptPercentWatched = (attachmentId, percent, contentId) =>
+  axiosClient.put(
+    `student/content-video/percent?attachmentId=${attachmentId}&percent=${percent}&contentId=${contentId}`
+  );
+export const getPercentWatched = (attachmentId, contentId) =>
+  axiosClient.get(
+    `student/content-video/percent?attachmentId=${attachmentId}&contentId=${contentId}`
+  );

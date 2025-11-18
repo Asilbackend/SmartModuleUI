@@ -51,3 +51,9 @@
     background: #64748b;
     /* Hover holatda rangi */
 }
+
+@media (max-width: 480px) {
+    :where(.css-dev-only-do-not-override-vrrzze).ant-steps.ant-steps-vertical>.ant-steps-item .ant-steps-item-icon {
+        margin-inline-end: 8px;
+    }
+}

@@ -1,18 +1,21 @@
-import { Checkbox, Dropdown, Input } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { Checkbox, Dropdown, Input, Spin } from 'antd';
 import {
   Bell,
+  BookCheck,
   ChevronDown,
   House,
   Layers,
   LogOut,
   Menu,
-  University,
   UserRound,
   X,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { getAllModules } from 'src/api/modules.api';
 
 import logo from '@/assets/logo.svg';
 
@@ -24,15 +27,7 @@ const items = [
 
 const NavItems = [
   { name: 'Bosh sahifa', href: '/home', icon: <House size={20} /> },
-  { name: 'Marifat darslari', href: '/enlightenment', icon: <University size={20} /> },
-  { name: 'Profil', href: '/profile', icon: <UserRound size={20} /> },
-];
-
-const moduleSubItems = [
-  { name: 'Modul 1', id: 1 },
-  { name: 'Modul 2', id: 2 },
-  { name: 'Modul 3', id: 3 },
-  { name: 'Modul 4', id: 4 },
+  { name: 'Marifat darslari', href: '/enlightenment', icon: <BookCheck size={20} /> },
 ];
 
 const Header = () => {
@@ -44,6 +39,16 @@ const Header = () => {
   const contentRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ['modules'],
+    queryFn: async () => {
+      const response = await getAllModules();
+      return response.data.content || [];
+    },
+  });
+
+  const modules = data || [];
 
   const handleMenuClick = (e) => {
     const selectedItem = items.find((item) => item.key === e.key);
@@ -59,7 +64,7 @@ const Header = () => {
   };
 
   return (
-    <header className='w-full bg-white py-4 md:py-2'>
+    <header className='w-full border-b border-gray-100 bg-white py-4 md:py-2'>
       <div className='px-6'>
         <div className='flex h-full items-center justify-between'>
           <div className='hidden items-center gap-[6px] lg:flex'>
@@ -120,10 +125,10 @@ const Header = () => {
                 isOpen ? 'translate-x-0' : '-translate-x-full'
               }`}
             >
-              <div className='flex items-center justify-between border-b p-4'>
+              <div className='flex items-center justify-between p-4'>
                 <div className='flex items-center gap-[6px]'>
                   <img src={logo} alt='Logo' className='h-12' />
-                  <h3 className={`w-40 text-[9px] !font-medium text-[#172243]`}>
+                  <h3 className='w-40 text-[9px] !font-medium text-[#172243]'>
                     MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI
                   </h3>
                 </div>
@@ -133,29 +138,31 @@ const Header = () => {
               </div>
 
               <nav className='space-y-3 p-4'>
-                {NavItems.slice(0, 2).map((item) => (
+                {/* Bosh sahifa va Marifat darslari */}
+                {NavItems.map((item) => (
                   <NavLink
                     key={item.name}
                     to={item.href}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-lg p-2 text-gray-800 transition ${
-                        isActive ? 'bg-[#F0F7FF]' : ''
+                      `flex items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF] ${
+                        isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
                       }`
                     }
                     onClick={() => setIsOpen(false)}
                   >
                     {item.icon}
-                    <span className='font-medium'>{item.name}</span>
+                    <span>{item.name}</span>
                   </NavLink>
                 ))}
 
+                {/* Modullar */}
                 <div>
                   <button
                     onClick={() => setIsModulesOpen(!isModulesOpen)}
-                    className='flex w-full items-center gap-3 rounded-lg p-2 text-gray-800 hover:bg-[#F0F7FF]'
+                    className='flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF]'
                   >
                     <Layers size={20} />
-                    <span className='font-medium'>Modullar</span>
+                    <span>Modullar</span>
                     <ChevronDown
                       className={`ml-auto transition-transform duration-200 ${
                         isModulesOpen ? 'rotate-180' : ''
@@ -166,49 +173,73 @@ const Header = () => {
 
                   <div
                     ref={contentRef}
-                    className={`overflow-hidden transition-all duration-200 ease-in-out`}
                     style={{
-                      maxHeight: isModulesOpen ? contentRef.current?.scrollHeight : 0,
+                      height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
+                      maxHeight: isModulesOpen ? '380px' : '0px',
+                      overflowY: 'auto',
                     }}
+                    className='custom-scroll overflow-hidden scroll-auto transition-all duration-300 ease-in-out'
                   >
                     <div className='space-y-2 pt-1'>
-                      {moduleSubItems.map((sub) => (
-                        <NavLink
-                          key={sub.id}
-                          to={`/modules/${sub.id}`}
-                          className={({ isActive }) =>
-                            `flex items-center gap-2 rounded-lg px-4 py-2 text-base transition hover:bg-[#F0F7FF] ${
-                              isActive ? 'bg-[#F0F7FF]' : ''
-                            }`
-                          }
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {({ isActive }) => (
-                            <>
-                              <Checkbox checked={isActive} className='my-custom-checkbox' />
-                              <span>{sub.name}</span>
-                            </>
-                          )}
-                        </NavLink>
-                      ))}
+                      {isPending && (
+                        <span className='flex justify-center px-4 py-2'>
+                          <Spin indicator={<LoadingOutlined spin />} />
+                        </span>
+                      )}
+
+                      {error && <p className='px-4 py-2 text-sm text-red-500'>Xatolik</p>}
+
+                      {!isPending && !error && modules.length === 0 && (
+                        <p className='px-4 py-2 text-sm text-gray-500'>Modullar topilmadi</p>
+                      )}
+
+                      {!isPending &&
+                        !error &&
+                        modules.length > 0 &&
+                        modules.map((mod) => (
+                          <NavLink
+                            key={mod.id}
+                            state={{ title: mod.name, desc: mod.description }}
+                            to={`/modules/${mod.id}`}
+                            className={({ isActive }) =>
+                              `mr-2 flex items-center gap-2 rounded-lg px-3 py-2 text-base transition hover:bg-[#F0F7FF] ${
+                                isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
+                              }`
+                            }
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {({ isActive }) => (
+                              <>
+                                <Checkbox checked={isActive} className='my-custom-checkbox' />
+                                <span>{mod.name}</span>
+                              </>
+                            )}
+                          </NavLink>
+                        ))}
                     </div>
                   </div>
                 </div>
 
+                {/* Profil */}
                 <NavLink
-                  to={'/profile'}
+                  to='/profile'
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg p-2 text-gray-800 transition ${
-                      isActive ? 'bg-[#F0F7FF]' : ''
+                    `flex items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF] ${
+                      isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
                     }`
                   }
                   onClick={() => setIsOpen(false)}
                 >
                   <UserRound size={20} />
-                  <span className='font-medium'>Profil</span>
+                  <span>Profil</span>
                 </NavLink>
               </nav>
             </div>
+
+            {/* Overlay */}
+            {isOpen && (
+              <div className='fixed inset-0 z-40 bg-black/20' onClick={() => setIsOpen(false)} />
+            )}
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { Checkbox, Spin } from 'antd';
 import { ArrowLeftToLine, BookCheck, ChevronDown, House, Layers, UserRound } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { getAllMoudles } from 'src/api/modules.api';
+import { getAllModules } from 'src/api/modules.api';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -19,7 +19,7 @@ const Sidebar = () => {
   const { data, isPending, error } = useQuery({
     queryKey: ['modules'],
     queryFn: async () => {
-      const response = await getAllMoudles();
+      const response = await getAllModules();
       return response.data.content || [];
     },
   });

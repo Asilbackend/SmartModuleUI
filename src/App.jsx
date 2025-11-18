@@ -12,7 +12,9 @@ import CertificatesList from './pages/certificates/CertificatesList';
 import Contents from './pages/contents/Contents.jsx';
 import EnlightenmentPage from './pages/enlightenment/EnlightenmentPage';
 import HomePage from './pages/homepage/HomePage';
+import ModuleFile from './pages/modules/ModuleFile';
 import ModulesList from './pages/modules/ModulesList';
+import ModuleText from './pages/modules/ModuleText';
 import ModuleVideo from './pages/modules/ModuleVideo';
 import News from './pages/news/News';
 import NewsList from './pages/news/NewsList';
@@ -36,6 +38,8 @@ const App = () => {
           <Route path='/modules' element={<Contents />} />
           <Route path='/modules/:id' element={<ModulesList />} />
           <Route path='/modules/:moduleId/video/:videoId' element={<ModuleVideo />} />
+          <Route path='/modules/:moduleId/text/:title' element={<ModuleText />} />
+          <Route path='/modules/:moduleId/file/:fileId' element={<ModuleFile />} />
           <Route path='/modules/:moduleId/test' element={<TestComponent />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/news' element={<News />}>

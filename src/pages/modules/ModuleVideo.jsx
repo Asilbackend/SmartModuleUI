@@ -1,24 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Rate, Skeleton } from 'antd';
 import { Check, Edit, MessageCircle, Send, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { VideoImg } from 'src/api/attachment-controller.api';
 import {
   addVideoComment,
   deleteVideoComment,
+  getPercentWatched,
   getVideoComments,
   getVideoRate,
   postVideoRate,
   updateVideoComment,
+  uptPercentWatched,
 } from 'src/api/content-video-controller.api';
 
 export default function ModuleVideo() {
   const [newComment, setNewComment] = useState('');
   const [editId, setEditId] = useState(null);
   const [editComment, setEditComment] = useState('');
+  const [seenVideo, setSeenVideo] = useState(false);
   const { videoId } = useParams();
   const queryClient = useQueryClient();
+  const videoRef = useRef(null);
+  const lastUpdateTimeRef = useRef(0);
+  const updateIntervalRef = useRef(null);
+  const { state } = useLocation();
 
   const {
     data: comments = [],
@@ -82,6 +89,146 @@ export default function ModuleVideo() {
     },
   });
 
+  const uptVideoMutation = useMutation({
+    mutationFn: ({ attachmentId, percent, contentId }) =>
+      uptPercentWatched(attachmentId, percent, contentId),
+  });
+
+  const getVideoPercent = useQuery({
+    queryKey: ['videoPercent', videoId],
+    queryFn: async () => {
+      const res = await getPercentWatched(videoId, state?.contentId);
+      return res.data || 0;
+    },
+  });
+
+  // Video percent 95% dan yuqori bo'lsa seenVideo ni true qilish
+  useEffect(() => {
+    if (getVideoPercent.data?.percent >= 99) {
+      setSeenVideo(true);
+    }
+  }, [getVideoPercent.data?.percent]);
+
+  const updateVideoProgress = () => {
+    const video = videoRef.current;
+    if (!video || !videoId || video.paused || seenVideo) return;
+
+    const currentTime = video.currentTime;
+    const duration = video.duration;
+
+    // Agar duration hali yuklanmagan bo'lsa yoki 0 bo'lsa
+    if (!duration || duration === 0) return;
+
+    // Foizni hisoblash
+    const percent = Math.floor((currentTime / duration) * 100);
+
+    // Har 3 sekundda yangilash
+    const now = Date.now();
+    if (now - lastUpdateTimeRef.current >= 3000) {
+      lastUpdateTimeRef.current = now;
+      if (percent > getVideoPercent.data?.percent) {
+        uptVideoMutation.mutate(
+          {
+            attachmentId: videoId,
+            percent: percent,
+            contentId: state?.contentId,
+          },
+          {
+            onSuccess: () => {
+              if (percent >= 100) {
+                setSeenVideo(true);
+                queryClient.invalidateQueries(['videoPercent', videoId]);
+              }
+            },
+          }
+        );
+      }
+
+      console.log(`Progress update: ${percent}% at ${currentTime}s / ${duration}s`);
+    }
+  };
+
+  // Video event handlers
+  const handlePlay = () => {
+    // Video play bo'lganda interval boshlash
+    if (updateIntervalRef.current) {
+      clearInterval(updateIntervalRef.current);
+    }
+    updateIntervalRef.current = setInterval(() => {
+      updateVideoProgress();
+    }, 1000); // Har sekundda tekshirish, lekin yuborish 3 sekundda bir marta
+  };
+
+  const handlePause = () => {
+    // Pause bo'lganda interval to'xtatish
+    if (updateIntervalRef.current) {
+      clearInterval(updateIntervalRef.current);
+      updateIntervalRef.current = null;
+    }
+
+    // Pause bo'lganda oxirgi holatni yuborish
+    const video = videoRef.current;
+    if (!video || !videoId || seenVideo) return;
+
+    const currentTime = video.currentTime;
+    const duration = video.duration;
+
+    if (!duration || duration === 0) return;
+
+    const percent = Math.floor((currentTime / duration) * 100);
+
+    uptVideoMutation.mutate(
+      {
+        attachmentId: videoId,
+        percent: percent,
+        contentId: state?.contentId,
+      },
+      {
+        onSuccess: () => {
+          if (percent >= 99) {
+            setSeenVideo(true);
+            queryClient.invalidateQueries(['videoPercent', videoId]);
+          }
+        },
+      }
+    );
+  };
+
+  const handleEnded = () => {
+    if (seenVideo) return; // ⛔ Yana PUT qilmaslik
+
+    uptVideoMutation.mutate(
+      {
+        attachmentId: videoId,
+        percent: 100,
+        contentId: state?.contentId,
+      },
+      {
+        onSuccess: () => {
+          setSeenVideo(true);
+          queryClient.invalidateQueries(['videoPercent', videoId]);
+        },
+      }
+    );
+  };
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (!video || !attachment.data?.lastWatchedTime) return;
+
+    // Agar avval ko'rilgan bo'lsa, o'sha joydan davom ettirish
+    video.currentTime = attachment.data.lastWatchedTime;
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+      }
+    };
+  }, []);
+
   const handleAddComment = () => {
     if (!newComment.trim()) return;
     addCommentMutation.mutate(newComment);
@@ -103,30 +250,34 @@ export default function ModuleVideo() {
             <Skeleton.Node
               active
               className='!h-0 !w-full rounded-t-2xl !bg-gray-200 !pb-[56.25%] sm:rounded-t-3xl'
-              style={{ paddingBottom: '56.25%' }} // 16:9 aspect ratio
+              style={{ paddingBottom: '56.25%' }}
             />
           </div>
         ) : (
           <div className='relative w-full overflow-hidden rounded-t-2xl sm:rounded-t-3xl'>
             <video
+              ref={videoRef}
               controls
               poster={attachment.data?.thumbnailImageUrl}
               className='aspect-video w-full rounded-t-2xl object-cover sm:rounded-t-3xl'
               playsInline
+              onPlay={handlePlay}
+              onPause={handlePause}
+              onEnded={handleEnded}
+              onLoadedMetadata={handleLoadedMetadata}
             >
               <source
                 src={`https://dev.anvarovich.uz/api/student/content-video/${videoId}/stream`}
                 type='video/mp4'
               />
-              Sizning brauzeringiz videoni qo‘llab-quvvatlamaydi.
+              Sizning brauzeringiz videoni qollab-quvvatlamaydi.
             </video>
           </div>
         )}
 
-        {/* Title + Rating */}
         <div className='flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5 lg:py-6'>
           <h2 className='text-lg leading-tight font-semibold sm:text-xl lg:text-2xl'>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            {state?.title}
           </h2>
           <div className='flex flex-col items-start gap-1 sm:items-end'>
             <Rate
@@ -183,7 +334,6 @@ export default function ModuleVideo() {
         {/* Comments List */}
         <div className='space-y-4'>
           {isPending ? (
-            // Loading Skeletons
             [...Array(3)].map((_, i) => (
               <div
                 key={i}
@@ -209,7 +359,7 @@ export default function ModuleVideo() {
           ) : comments.length === 0 ? (
             <div className='py-10 text-center'>
               <MessageCircle size={44} className='mx-auto mb-3 text-gray-300' />
-              <p className='text-sm text-gray-500'>Hozircha fikr yo‘q</p>
+              <p className='text-sm text-gray-500'>Hozircha fikr yoq</p>
               <p className='mt-1 text-xs text-gray-400'>Birinchi fikrni siz qoldiring!</p>
             </div>
           ) : (
@@ -219,12 +369,10 @@ export default function ModuleVideo() {
                 className='border-b border-gray-100 pb-4 last:border-0 last:pb-0'
               >
                 <div className='flex items-start gap-3'>
-                  {/* Avatar */}
                   <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white sm:h-9 sm:w-9 sm:text-sm'>
                     {(comment.firstName?.[0] || 'U') + (comment.lastName?.[0] || '')}
                   </div>
 
-                  {/* Comment Content */}
                   <div className='min-w-0 flex-1'>
                     <div className='mb-1 flex flex-wrap items-center gap-2 text-xs sm:text-sm'>
                       <span className='font-medium text-gray-900'>
@@ -296,7 +444,7 @@ export default function ModuleVideo() {
                               className='inline-flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50'
                             >
                               <Trash2 size={12} />
-                              {deleteCommentMutation.isPending ? 'O‘chmoqda...' : 'O‘chirish'}
+                              {deleteCommentMutation.isPending ? 'Ochmoqda...' : 'Ochirish'}
                             </button>
                           </div>
                         )}
