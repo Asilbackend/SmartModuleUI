@@ -65,7 +65,7 @@ const Header = () => {
 
   return (
     <header className='w-full border-b border-gray-100 bg-white py-4 md:py-2'>
-      <div className='px-6'>
+      <div className='px-2 md:px-6'>
         <div className='flex h-full items-center justify-between'>
           <div className='hidden items-center gap-[6px] lg:flex'>
             <img src={logo} alt='Logo' className='h-12' />
@@ -92,7 +92,7 @@ const Header = () => {
               onOpenChange={(visible) => setDropdownOpen(visible)}
               trigger={['click']}
             >
-              <div className='flex cursor-pointer items-center gap-0.5 rounded-lg px-1 py-2'>
+              <div className='flex cursor-pointer items-center gap-0.5 rounded-lg sm:px-1 sm:py-2'>
                 <span className='text-[16px] font-semibold text-[#172243]'>{selectedLang}</span>
                 <ChevronDown
                   className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
@@ -102,7 +102,7 @@ const Header = () => {
 
             <Bell size={23} onClick={() => setpushOpen(true)} className='cursor-pointer' />
 
-            <LogOut onClick={() => logOut()} size={22} className='cursor-pointer' />
+            <LogOut onClick={() => logOut()} size={22} className='cursor-pointer ml-1' />
 
             {/* Notification */}
             {pushOpen && (

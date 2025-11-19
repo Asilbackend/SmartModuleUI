@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Eye, Heart, Share2, Volume2, VolumeX } from 'lucide-react';
+import { Eye, Heart, Share2, Volume2, VolumeX, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getNewsData, newsLike } from 'src/api/news-page-controller.api';
@@ -9,6 +9,7 @@ export default function MobileVideoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [remainingTime, setRemainingTime] = useState('00:00');
   const { storyId } = useParams();
   const queryClient = useQueryClient();
 
@@ -35,6 +36,14 @@ export default function MobileVideoPlayer() {
     },
   });
 
+  // Format time helper function
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -48,10 +57,14 @@ export default function MobileVideoPlayer() {
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !video.duration) return;
 
     const progress = (video.currentTime / video.duration) * 100;
     setProgress(progress);
+
+    // Qolgan vaqt (kamayadi)
+    const remaining = video.duration - video.currentTime;
+    setRemainingTime(formatTime(remaining));
   };
 
   const toggleMute = (e) => {
@@ -61,6 +74,10 @@ export default function MobileVideoPlayer() {
 
     video.muted = !video.muted;
     setIsMuted(video.muted);
+  };
+
+  const handleClose = () => {
+    window.history.back();
   };
 
   // Share funksiyasi
@@ -93,12 +110,21 @@ export default function MobileVideoPlayer() {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
+    // Video yuklanganda total vaqtni o'rnatish
+    const handleLoadedMetadata = () => {
+      if (video.duration) {
+        setRemainingTime(formatTime(video.duration));
+      }
+    };
+
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, []);
 
@@ -113,7 +139,7 @@ export default function MobileVideoPlayer() {
   }
 
   return (
-    <div className='relative mx-auto aspect-[9/16] w-full max-w-sm overflow-hidden bg-black shadow-2xl'>
+    <div className='relative mx-auto aspect-[9/16] h-full w-full overflow-hidden bg-black shadow-2xl sm:max-h-190 sm:max-w-sm'>
       {/* Video */}
       <video
         ref={videoRef}
@@ -151,7 +177,7 @@ export default function MobileVideoPlayer() {
       {/* Modern Progress bar with glow */}
       <div className='absolute top-0 left-0 h-1 w-full bg-white/10'>
         <div
-          className='h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/50 transition-all duration-200'
+          className='h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/50 transition-all duration-800'
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -163,7 +189,7 @@ export default function MobileVideoPlayer() {
             <div className='flex items-center gap-2'>
               <span className='inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90'>
                 <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-red-500' />
-                {data?.videoDuration}
+                {remainingTime}
               </span>
               <span className='inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90'>
                 <Eye size={16} />
@@ -173,12 +199,20 @@ export default function MobileVideoPlayer() {
           </div>
 
           {/* Mute button */}
-          <button
-            onClick={toggleMute}
-            className='rounded-full bg-white/10 p-2.5 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/20'
-          >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={toggleMute}
+              className='rounded-full bg-white/10 p-2.5 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/20'
+            >
+              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            </button>
+            <button
+              onClick={handleClose}
+              className='rounded-full bg-white/10 p-2.5 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95'
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
       </div>
 

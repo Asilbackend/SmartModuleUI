@@ -149,44 +149,86 @@ export default function ModuleList() {
               current={firstUnreadIndex === -1 ? sortedAttachments.length : firstUnreadIndex}
               items={sortedAttachments.map((item, index) => ({
                 description: (
-                  <div className='mb-2 flex items-start justify-between gap-1'>
-                    <div className='flex items-start gap-3'>
-                      <div className='min-w-[30px]'>
+                  <div>
+                    <div className='mb-2 hidden items-start justify-between gap-1 sm:flex'>
+                      <div className='flex items-start gap-2 sm:gap-3'>
+                        <div className='min-w-[30px]'>
+                          {item.contentType === 'VIDEO' ? (
+                            <TvMinimalPlay size={32} />
+                          ) : (
+                            <BookOpenText size={32} />
+                          )}
+                        </div>
+                        <div className='flex max-w-[200px] flex-col md:max-w-full'>
+                          <h3 className='line-clamp-2 text-[16px] md:text-[20px]'>{item.title}</h3>
+                          <div className='flex gap-2 text-gray-500'>
+                            <p className='text-[14px]'>{item.contentType}</p>
+                            {item.videoDuration && (
+                              <p className='text-[14px]'>{item.videoDuration}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {item.isRead ? (
+                        <button
+                          onClick={() => handleStepClick(section.contentId, item)}
+                          className='cursor-pointer rounded-lg bg-[#F0F7FF] px-2 py-1 text-[#008CFF] sm:px-3 sm:py-2'
+                        >
+                          Tugallangan
+                        </button>
+                      ) : index === firstUnreadIndex ? (
+                        // Agar birinchi o'qilmagan element bo'lsa - "Boshlash" tugmasi
+                        <button
+                          onClick={() => handleStepClick(section.contentId, item)}
+                          className='cursor-pointer rounded-lg bg-blue-600 px-2 py-1 text-white hover:bg-blue-700 sm:px-5 sm:py-2'
+                        >
+                          Boshlash
+                        </button>
+                      ) : null}
+                    </div>
+                    <div className='mb-2 flex items-start justify-between gap-2 sm:hidden'>
+                      <div className='min-w-[30px] mt-1'>
                         {item.contentType === 'VIDEO' ? (
                           <TvMinimalPlay size={32} />
                         ) : (
                           <BookOpenText size={32} />
                         )}
                       </div>
-                      <div className='flex max-w-[200px] flex-col md:max-w-full'>
-                        <h3 className='line-clamp-2 text-[16px] md:text-[20px]'>{item.title}</h3>
-                        <div className='flex gap-2 text-gray-500'>
-                          <p className='text-[14px]'>{item.contentType}</p>
-                          {item.videoDuration && (
-                            <p className='text-[14px]'>{item.videoDuration}</p>
-                          )}
+                      <div className='w-full'>
+                        <div className='mb-2 flex items-start gap-2 sm:gap-3'>
+                          <div className='flex max-w-full flex-col'>
+                            <h3 className='line-clamp-2 text-[16px] md:text-[20px]'>
+                              {item.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className='flex justify-between'>
+                          <div className='flex gap-2 text-gray-500'>
+                            <p className='text-[14px]'>{item.contentType}</p>
+                            {item.videoDuration && (
+                              <p className='text-[14px]'>{item.videoDuration}</p>
+                            )}
+                          </div>
+                          {item.isRead ? (
+                            <button
+                              onClick={() => handleStepClick(section.contentId, item)}
+                              className='cursor-pointer rounded-lg bg-[#F0F7FF] px-3 py-1 text-[#008CFF] sm:px-3 sm:py-2'
+                            >
+                              Tugallangan
+                            </button>
+                          ) : index === firstUnreadIndex ? (
+                            <button
+                              onClick={() => handleStepClick(section.contentId, item)}
+                              className='cursor-pointer rounded-lg bg-blue-600 px-3 py-1 text-white hover:bg-blue-700 sm:px-5 sm:py-2'
+                            >
+                              Boshlash
+                            </button>
+                          ) : null}
                         </div>
                       </div>
                     </div>
-
-                    {/* Tugmalarni ko'rsatish mantiqi */}
-                    {item.isRead ? (
-                      // Agar o'qilgan bo'lsa - "Tugallangan" tugmasi
-                      <button
-                        onClick={() => handleStepClick(section.contentId, item)}
-                        className='cursor-pointer rounded-lg bg-[#F0F7FF] px-3 py-2 text-[#008CFF]'
-                      >
-                        Tugallangan
-                      </button>
-                    ) : index === firstUnreadIndex ? (
-                      // Agar birinchi o'qilmagan element bo'lsa - "Boshlash" tugmasi
-                      <button
-                        onClick={() => handleStepClick(section.contentId, item)}
-                        className='cursor-pointer rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700'
-                      >
-                        Boshlash
-                      </button>
-                    ) : null}
                   </div>
                 ),
               }))}

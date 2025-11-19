@@ -141,6 +141,7 @@ const HomePage = () => {
               {videos.map((item, index) => (
                 <Link
                   to={`/modules/1/video/${item.attachmentId}`}
+                  state={{ title: item.title }}
                   key={index}
                   className='block transition-transform duration-300 hover:-translate-y-1'
                 >
