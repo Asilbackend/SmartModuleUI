@@ -1,10 +1,21 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from 'antd';
 import { useLocation } from 'react-router-dom';
+import { VideoImg } from 'src/api/attachment-controller.api';
 import { postPictureContent } from 'src/api/modules.api';
 
 const ModuleFile = () => {
   const { state } = useLocation();
+
+  const { data } = useQuery({
+    queryKey: ['moduleFile', state.attachmentId],
+    queryFn: async () => {
+      const res = await VideoImg(state.attachmentId);
+      return res.data || [];
+    },
+    enabled: !!state.attachmentId,
+  });
+
   const pictureContentMutation = useMutation({
     mutationFn: ({ attachmentId, contentId }) => postPictureContent(attachmentId, contentId),
   });
@@ -16,7 +27,7 @@ const ModuleFile = () => {
   };
   return (
     <>
-      <div>ModuleFile: {state.attachmentId}</div>
+      <div>{data?.url && <div>URL: {data.url}</div>}</div>
       <Button
         onClick={postReed}
         disabled={

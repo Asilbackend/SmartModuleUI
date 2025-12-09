@@ -1,11 +1,12 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Checkbox, Dropdown, Input, Spin } from 'antd';
+import { Checkbox, Dropdown, Empty, Input, Spin } from 'antd';
 import {
+  AlertTriangle,
   Bell,
   BookCheck,
   ChevronDown,
-  House,
+  Home,
   Layers,
   LogOut,
   Menu,
@@ -26,7 +27,7 @@ const items = [
 ];
 
 const NavItems = [
-  { name: 'Bosh sahifa', href: '/home', icon: <House size={20} /> },
+  { name: 'Bosh sahifa', href: '/home', icon: <Home size={20} /> },
   { name: 'Marifat darslari', href: '/enlightenment', icon: <BookCheck size={20} /> },
 ];
 
@@ -36,6 +37,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [pushOpen, setpushOpen] = useState(false);
   const [isModulesOpen, setIsModulesOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const contentRef = useRef(null);
 
   const navigate = useNavigate();
@@ -58,192 +60,315 @@ const Header = () => {
     setDropdownOpen(false);
   };
 
-  const logOut = () => {
+  const handleLogoutClick = () => {
+    setLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
     navigate('/');
   };
 
+  const cancelLogout = () => {
+    setLogoutModalOpen(false);
+  };
+
   return (
-    <header className='w-full border-b border-gray-100 bg-white py-4 md:py-2'>
-      <div className='px-2 md:px-6'>
-        <div className='flex h-full items-center justify-between'>
-          <div className='hidden items-center gap-[6px] lg:flex'>
-            <img src={logo} alt='Logo' className='h-12' />
-            <h3 className='w-40 text-[10px] font-medium text-[#172243]'>
-              MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI
-            </h3>
-          </div>
-          <button onClick={() => setIsOpen(true)} className='mr-4 text-gray-800 lg:hidden'>
-            <Menu size={26} />
-          </button>
-
-          <Input
-            size='large'
-            placeholder='Qidiruv'
-            prefix={<FiSearch size={22} color='#ACACAC' className='mx-0 lg:mx-1' />}
-            className='mx-auto !rounded-3xl !border-none !bg-[#F0F7FF] !py-2 md:!w-[480px] md:!py-[4px] lg:!py-[10px] xl:!w-[600px]'
-          />
-
-          <div className='ml-4 flex items-center gap-2 lg:gap-[20px]'>
-            <Dropdown
-              menu={{ items, onClick: handleMenuClick }}
-              placement='bottomRight'
-              open={dropdownOpen}
-              onOpenChange={(visible) => setDropdownOpen(visible)}
-              trigger={['click']}
-            >
-              <div className='flex cursor-pointer items-center gap-0.5 rounded-lg sm:px-1 sm:py-2'>
-                <span className='text-[16px] font-semibold text-[#172243]'>{selectedLang}</span>
-                <ChevronDown
-                  className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                />
-              </div>
-            </Dropdown>
-
-            <Bell size={23} onClick={() => setpushOpen(true)} className='cursor-pointer' />
-
-            <LogOut onClick={() => logOut()} size={22} className='cursor-pointer ml-1' />
-
-            {/* Notification */}
-            {pushOpen && (
-              <div className='fixed top-16 right-14 z-50 w-80 rounded-lg bg-white p-4 shadow-sm'>
-                <div className='mb-2 flex items-center justify-between'>
-                  <span className='font-semibold text-[#172243]'>Push Notifications</span>
-                  <button className='cursor-pointer' onClick={() => setpushOpen(false)}>
-                    <X size={20} className='text-gray-700' />
-                  </button>
-                </div>
-                <div className='text-sm text-gray-600'>
-                  Sizda yangi bildirishnomalar mavjud emas
-                </div>
-              </div>
-            )}
-
-            {/* MOBILE SIDEBAR */}
-            <div
-              className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ${
-                isOpen ? 'translate-x-0' : '-translate-x-full'
-              }`}
-            >
-              <div className='flex items-center justify-between p-4'>
-                <div className='flex items-center gap-[6px]'>
-                  <img src={logo} alt='Logo' className='h-12' />
-                  <h3 className='w-40 text-[9px] !font-medium text-[#172243]'>
-                    MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI
-                  </h3>
-                </div>
-                <button onClick={() => setIsOpen(false)}>
-                  <X size={24} className='text-gray-700' />
-                </button>
-              </div>
-
-              <nav className='space-y-3 p-4'>
-                {/* Bosh sahifa va Marifat darslari */}
-                {NavItems.map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF] ${
-                        isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
-                      }`
-                    }
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </NavLink>
-                ))}
-
-                {/* Modullar */}
-                <div>
-                  <button
-                    onClick={() => setIsModulesOpen(!isModulesOpen)}
-                    className='flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF]'
-                  >
-                    <Layers size={20} />
-                    <span>Modullar</span>
-                    <ChevronDown
-                      className={`ml-auto transition-transform duration-200 ${
-                        isModulesOpen ? 'rotate-180' : ''
-                      }`}
-                      size={20}
-                    />
-                  </button>
-
-                  <div
-                    ref={contentRef}
-                    style={{
-                      height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
-                      maxHeight: isModulesOpen ? '380px' : '0px',
-                      overflowY: 'auto',
-                    }}
-                    className='custom-scroll overflow-hidden scroll-auto transition-all duration-300 ease-in-out'
-                  >
-                    <div className='space-y-2 pt-1'>
-                      {isPending && (
-                        <span className='flex justify-center px-4 py-2'>
-                          <Spin indicator={<LoadingOutlined spin />} />
-                        </span>
-                      )}
-
-                      {error && <p className='px-4 py-2 text-sm text-red-500'>Xatolik</p>}
-
-                      {!isPending && !error && modules.length === 0 && (
-                        <p className='px-4 py-2 text-sm text-gray-500'>Modullar topilmadi</p>
-                      )}
-
-                      {!isPending &&
-                        !error &&
-                        modules.length > 0 &&
-                        modules.map((mod) => (
-                          <NavLink
-                            key={mod.id}
-                            state={{ title: mod.name, desc: mod.description }}
-                            to={`/modules/${mod.id}`}
-                            className={({ isActive }) =>
-                              `mr-2 flex items-center gap-2 rounded-lg px-3 py-2 text-base transition hover:bg-[#F0F7FF] ${
-                                isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
-                              }`
-                            }
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {({ isActive }) => (
-                              <>
-                                <Checkbox checked={isActive} className='my-custom-checkbox' />
-                                <span>{mod.name}</span>
-                              </>
-                            )}
-                          </NavLink>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Profil */}
-                <NavLink
-                  to='/profile'
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-xl px-3 py-2 text-xl transition hover:bg-[#F0F7FF] ${
-                      isActive ? 'bg-[#F0F7FF] shadow-xs' : ''
-                    }`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  <UserRound size={20} />
-                  <span>Profil</span>
-                </NavLink>
-              </nav>
+    <>
+      <header className='sticky top-0 z-40 w-full border-b border-gray-100 bg-white'>
+        <div className='px-3 py-3 sm:px-6 sm:py-2'>
+          <div className='flex items-center justify-between gap-4'>
+            {/* Logo - Desktop */}
+            <div className='hidden items-center gap-2 lg:flex'>
+              <img src={logo} alt='Logo' className='h-11' />
+              <h3 className='w-40 text-[10px] leading-tight font-semibold text-[#013464]'>
+                MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI
+              </h3>
             </div>
 
-            {/* Overlay */}
-            {isOpen && (
-              <div className='fixed inset-0 z-40 bg-black/20' onClick={() => setIsOpen(false)} />
-            )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsOpen(true)}
+              className='rounded-xl p-2 text-gray-700 transition-colors hover:bg-gray-100 lg:hidden'
+            >
+              <Menu size={24} />
+            </button>
+
+            {/* Search Bar */}
+            <Input
+              size='large'
+              placeholder='Qidiruv...'
+              prefix={<FiSearch size={20} color='#9CA3AF' />}
+              className='mx-auto !rounded-2xl !border-none !bg-[#F0F7FF] !py-2.5 md:!w-[480px] lg:!py-3 xl:!w-[600px]'
+            />
+
+            {/* Right Section */}
+            <div className='flex items-center gap-2 sm:gap-4'>
+              {/* Language Dropdown */}
+              <Dropdown
+                menu={{ items, onClick: handleMenuClick }}
+                placement='bottomRight'
+                open={dropdownOpen}
+                onOpenChange={(visible) => setDropdownOpen(visible)}
+                trigger={['click']}
+              >
+                <button className='flex items-center gap-1 rounded-xl px-2 py-1.5 font-semibold text-[#013464] transition-colors hover:bg-gray-100 sm:px-3 sm:py-2'>
+                  <span className='text-sm sm:text-base'>{selectedLang}</span>
+                  <ChevronDown
+                    size={18}
+                    className={`transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              </Dropdown>
+
+              {/* Notifications */}
+              <button
+                onClick={() => setpushOpen(true)}
+                className='relative rounded-xl p-2 text-gray-700 transition-colors hover:bg-gray-100'
+              >
+                <Bell size={22} />
+                <span className='absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500'></span>
+              </button>
+
+              {/* Logout */}
+              <button
+                onClick={handleLogoutClick}
+                className='rounded-xl p-2 text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600'
+              >
+                <LogOut size={22} />
+              </button>
+            </div>
           </div>
         </div>
+      </header>
+
+      {/* Notification Panel */}
+      {pushOpen && (
+        <>
+          <div className='fixed inset-0 z-40 bg-black/20' onClick={() => setpushOpen(false)}></div>
+          <div className='fixed top-20 right-4 z-50 w-80 rounded-2xl bg-white p-4 shadow-2xl sm:right-8 sm:w-96'>
+            <div className='mb-4 flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Bell size={20} className='text-blue-600' />
+                <span className='font-bold text-[#013464]'>Bildirishnomalar</span>
+              </div>
+              <button
+                className='rounded-lg p-1 transition-colors hover:bg-gray-100'
+                onClick={() => setpushOpen(false)}
+              >
+                <X size={20} className='text-gray-700' />
+              </button>
+            </div>
+            <div className='rounded-xl bg-gray-50 p-8 text-center'>
+              <Bell size={32} className='mx-auto mb-2 text-gray-300' />
+              <p className='text-sm text-gray-500'>Yangi bildirishnomalar yoq</p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* MOBILE SIDEBAR */}
+      <div
+        className={`fixed top-0 left-0 z-50 h-full w-72 transform overflow-y-auto bg-white shadow-2xl transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Sidebar Header */}
+        <div className='sticky top-0 z-10 border-b border-gray-100 bg-white p-4'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <img src={logo} alt='Logo' className='h-10' />
+              <h3 className='w-36 text-[9px] leading-tight font-semibold text-[#013464]'>
+                MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI
+              </h3>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className='rounded-lg p-1.5 transition-colors hover:bg-gray-100'
+            >
+              <X size={22} className='text-gray-700' />
+            </button>
+          </div>
+        </div>
+
+        {/* Sidebar Content */}
+        <nav className='space-y-1 p-3'>
+          {NavItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.href}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
+                  isActive
+                    ? 'bg-[#F0F7FF] text-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className='absolute left-0 h-8 w-1 rounded-r-full bg-blue-600' />
+                  )}
+                  {item.icon}
+                  <span className='font-medium'>{item.name}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+
+          {/* Modullar Accordion */}
+          <div className='pt-2'>
+            <button
+              onClick={() => setIsModulesOpen(!isModulesOpen)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
+                isModulesOpen ? 'bg-[#F0F7FF] text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Layers size={20} />
+              <span className='font-medium'>Modullar</span>
+              <ChevronDown
+                className={`ml-auto transition-transform duration-300 ${
+                  isModulesOpen ? 'rotate-180' : ''
+                }`}
+                size={18}
+              />
+            </button>
+
+            <div
+              ref={contentRef}
+              style={{
+                height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
+                maxHeight: isModulesOpen ? '400px' : '0px',
+              }}
+              className='custom-scroll overflow-hidden overflow-y-auto transition-all duration-300'
+            >
+              <div className='space-y-1 py-2'>
+                {isPending && (
+                  <div className='flex justify-center py-4'>
+                    <Spin indicator={<LoadingOutlined spin />} size='small' />
+                  </div>
+                )}
+
+                {error && (
+                  <div className='rounded-lg bg-red-50 px-3 py-2'>
+                    <p className='text-xs text-red-600'>Xatolik yuz berdi</p>
+                  </div>
+                )}
+
+                {!isPending && !error && modules.length === 0 && (
+                  <div className='py-4'>
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<span className='text-xs text-gray-500'>Modullar yoq</span>}
+                    />
+                  </div>
+                )}
+
+                {!isPending &&
+                  !error &&
+                  modules.length > 0 &&
+                  modules.map((mod) => (
+                    <NavLink
+                      key={mod.id}
+                      state={{ title: mod.name, desc: mod.description }}
+                      to={`/modules/${mod.id}`}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all ${
+                          isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                        }`
+                      }
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <Checkbox
+                            checked={isActive}
+                            className='my-custom-checkbox pointer-events-none'
+                          />
+                          <span className='truncate font-medium'>{mod.name}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Profil */}
+          <div className='border-t border-gray-100 pt-2'>
+            <NavLink
+              to='/profile'
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
+                  isActive
+                    ? 'bg-[#F0F7FF] text-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className='absolute left-0 h-8 w-1 rounded-r-full bg-blue-600' />
+                  )}
+                  <UserRound size={20} />
+                  <span className='font-medium'>Profil</span>
+                </>
+              )}
+            </NavLink>
+          </div>
+        </nav>
       </div>
-    </header>
+
+      {/* Mobile Sidebar Overlay */}
+      {isOpen && (
+        <div
+          className='fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden'
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {logoutModalOpen && (
+        <div className='fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm'>
+          <div className='animate-in fade-in zoom-in w-full max-w-md duration-200'>
+            <div className='rounded-2xl bg-white p-6 shadow-2xl sm:rounded-3xl sm:p-8'>
+              <div className='mb-6 flex items-center justify-center'>
+                <div className='flex h-16 w-16 items-center justify-center rounded-full bg-red-100 sm:h-20 sm:w-20'>
+                  <AlertTriangle size={36} className='text-red-600 sm:h-10 sm:w-10' />
+                </div>
+              </div>
+
+              <h2 className='mb-3 text-center text-xl font-bold text-[#013464] sm:text-2xl'>
+                Tizimdan chiqish
+              </h2>
+              <p className='mb-8 text-center text-sm text-gray-600 sm:text-base'>
+                Rostdan ham tizimdan chiqmoqchimisiz? Qayta kirish uchun login va parolingizni
+                kiritishingiz kerak boladi.
+              </p>
+
+              <div className='flex gap-3'>
+                <button
+                  onClick={cancelLogout}
+                  className='flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 active:scale-95'
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className='flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white shadow-lg transition-all hover:bg-red-700 hover:shadow-xl active:scale-95'
+                >
+                  Chiqish
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

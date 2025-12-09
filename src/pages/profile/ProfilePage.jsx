@@ -1,225 +1,447 @@
-import { Button, Flex, Progress } from 'antd';
-import { Check, Eye, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Button, Empty, Modal, Progress, Skeleton } from 'antd';
+import { Award, Check, Clock, Eye, PlayCircle, TrendingUp, X } from 'lucide-react';
 import { useState } from 'react';
+import {
+  getLastViewedVideos,
+  getModuleStatus,
+  getStudentData,
+} from 'src/api/profile-controller.api';
 
 const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('COMPLETED');
 
-  const [activeTab, setActiveTab] = useState('done');
+  const getProfile = useQuery({
+    queryKey: ['studentProfile'],
+    queryFn: async () => {
+      const res = await getStudentData();
+      return res.data || {};
+    },
+  });
 
-  const doneModules = [
-    { id: 1, title: '1. Universitet tarixi va tashkiliy tuzilmasi', percent: 60 },
-    { id: 2, title: '2. Universitet tarixi va tashkiliy tuzilmasi', percent: 80 },
-  ];
+  const lastVideos = useQuery({
+    queryKey: ['lastViewedVideos'],
+    queryFn: async () => {
+      const res = await getLastViewedVideos();
+      return res.data || {};
+    },
+  });
 
-  const newModules = [
-    { id: 1, title: '1. Yangi modul', percent: 0 },
-    { id: 2, title: '2. Yangi modul', percent: 0 },
-    { id: 3, title: '3. Yangi modul', percent: 0 },
-    { id: 4, title: '4. Yangi modul', percent: 0 },
-  ];
+  const getStatus = useQuery({
+    queryKey: ['moduleStatus', activeTab],
+    queryFn: async () => {
+      const res = await getModuleStatus(activeTab);
+      return res.data || [];
+    },
+  });
 
-  const unFinishedModules = [
-    { id: 1, title: '1. Tugatilmagan modul', percent: 30 },
-    { id: 2, title: '2. Tugatilmagan modul', percent: 50 },
-  ];
-
-  const getModules = () => {
-    if (activeTab === 'done') return doneModules;
-    if (activeTab === 'new') return newModules;
-    if (activeTab === 'unfinished') return unFinishedModules;
-    return [];
-  };
-
-  const handleClick = () => {
-    setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
-  const student = {
-    ism: 'Abubakir',
-    familiya: 'Yoqubjonov',
-    yonalish: 'Suniy Intelekt',
-    oqishTili: 'Uz',
-    kurs: 2,
-    guruh: '261-23',
-    daraja: 'Bakalavr',
-    talimShakli: 'Kunduzgi',
-    stipendiya: 'Yo‘q',
+  const setModuleStatus = (status) => {
+    setActiveTab(status);
   };
 
   const leftInfo = [
-    { label: 'Ism', value: student.ism },
-    { label: 'Familiya', value: student.familiya },
-    { label: 'Yo’nalish', value: student.yonalish },
-    { label: 'O’qish tili', value: student.oqishTili },
-    { label: 'Kurs', value: student.kurs },
-    { label: 'Guruh', value: student.guruh },
+    { label: 'Ism', value: getProfile.data?.firstname },
+    { label: 'Familiya', value: getProfile.data?.lastname },
+    { label: 'Yo`nalish', value: getProfile.data?.direction },
+    { label: 'O`qish tili', value: getProfile.data?.lang },
+    { label: 'Guruh', value: getProfile.data?.groupName },
   ];
 
-  const rightInfo = [
-    { label: 'Darajasi', value: student.daraja },
-    { label: 'Ta’lim shakli', value: student.talimShakli },
-    { label: 'Stipendiya', value: student.stipendiya },
-  ];
+  const validVideos = lastVideos.data?.content?.filter((v) => v.progress !== null) || [];
+  const latestVideo = validVideos[0];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'COMPLETED':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'FAILED':
+        return 'bg-red-50 text-red-700 border-red-200';
+      case 'IN_PROGRESS':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'COMPLETED':
+        return <Check size={16} className='text-green-600' />;
+      case 'FAILED':
+        return <X size={16} className='text-red-600' />;
+      case 'IN_PROGRESS':
+        return <TrendingUp size={16} className='text-blue-600' />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className='mx-auto max-w-6xl'>
-      <div className='gap-4 sm:gap-6 md:gap-8'>
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-12'>
-          {/* Video Block */}
-          <div className='rounded-3xl bg-white shadow-xs lg:col-span-5'>
-            <video
-              controls
-              poster='/news-image.png'
-              className='mx-auto mb-4 h-auto w-full rounded-3xl object-cover md:h-[280px]'
-            >
-              <source src='./123.mp4' type='video/mp4' />
-              Sizning browser videoni qo‘llab-quvvatlamaydi.
-            </video>
-            <div className='px-4 pb-4'>
-              <h3 className='mb-2 text-xl font-bold text-[#013464] md:text-2xl'>
-                Digital Science jurnali endi TATUda
-              </h3>
-              <p>
-                TATUda yangi ilmiy jurnal - Digital Science chop etilmoqda. Unda talabalar va
-                o‘qituvchilar o‘z maqolalari bilan qatnashishlari mumkin.
-              </p>
+    <div className='mx-auto w-full max-w-6xl p-3 sm:p-4'>
+      <div className='space-y-4 sm:space-y-6'>
+        <div className='grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12'>
+          {/* Last Viewed Video Block */}
+          <div className='rounded-2xl bg-white shadow-lg sm:rounded-3xl lg:col-span-5'>
+            {lastVideos.isLoading ? (
+              <Skeleton.Image
+                active
+                className='!h-48 !w-full rounded-t-2xl sm:!h-64 sm:rounded-t-3xl'
+              />
+            ) : latestVideo ? (
+              <div
+                className='group relative cursor-pointer overflow-hidden rounded-t-2xl sm:rounded-t-3xl'
+                onClick={() => setIsVideoModalOpen(true)}
+              >
+                <img
+                  src={latestVideo.thumbnailImageUrl}
+                  alt={latestVideo.title}
+                  className='h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-64'
+                />
+                <div className='absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+                  <div className='flex flex-col items-center gap-2 text-white'>
+                    <PlayCircle size={48} strokeWidth={1.5} className='sm:h-14 sm:w-14' />
+                    <span className='px-2 text-center text-xs font-medium sm:text-sm'>
+                      Barcha videolarni korish
+                    </span>
+                  </div>
+                </div>
+                <div className='absolute top-2 right-2 rounded-full bg-black/70 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm sm:top-4 sm:right-4 sm:px-3 sm:py-1.5'>
+                  {latestVideo.progress}% korildi
+                </div>
+              </div>
+            ) : (
+              <div className='flex h-48 items-center justify-center rounded-t-2xl bg-gray-100 sm:h-64 sm:rounded-t-3xl'>
+                <div className='text-center text-gray-400'>
+                  <Clock size={40} className='mx-auto mb-2 sm:h-12 sm:w-12' />
+                  <p className='text-sm sm:text-base'>Hali video korilmagan</p>
+                </div>
+              </div>
+            )}
+
+            <div className='px-3 py-3 sm:px-4 sm:pt-4 sm:pb-4'>
+              <div className='mb-2 flex items-center gap-2'>
+                <Clock size={16} className='text-blue-600 sm:h-[18px] sm:w-[18px]' />
+                <h3 className='text-base font-bold text-[#013464] sm:text-lg'>
+                  Oxirgi korilgan video
+                </h3>
+              </div>
+              {latestVideo ? (
+                <>
+                  <h4 className='mb-2 text-lg font-semibold text-gray-800 sm:text-xl'>
+                    {latestVideo.title}
+                  </h4>
+                  <p className='mb-3 text-xs text-gray-600 sm:text-sm'>
+                    {latestVideo.description || 'Tavsif mavjud emas'}
+                  </p>
+                  <button
+                    onClick={() => setIsVideoModalOpen(true)}
+                    className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:rounded-xl sm:py-2.5'
+                  >
+                    <Eye size={16} className='sm:h-[18px] sm:w-[18px]' />
+                    <span className='hidden sm:inline'>
+                      Barcha videolarni korish ({validVideos.length})
+                    </span>
+                    <span className='sm:hidden'>Videolar ({validVideos.length})</span>
+                  </button>
+                </>
+              ) : (
+                <p className='text-xs text-gray-500 sm:text-sm'>
+                  Siz hali birorta ham video kormadingiz
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Info Block */}
-          <div className='rounded-3xl bg-white p-2 shadow-xs lg:col-span-7'>
-            <div className='flex flex-col rounded-lg md:flex-row'>
-              <div className='flex items-center justify-center p-2 sm:p-4 md:w-1/3'>
-                <img
-                  src='./image.png'
-                  alt='Talaba rasmi'
-                  className='w-full rounded-lg object-cover md:h-60'
-                />
+          {/* Profile Info */}
+          <div className='rounded-2xl bg-white p-3 shadow-lg sm:rounded-3xl sm:p-4 lg:col-span-7'>
+            {getProfile.isLoading ? (
+              <div className='flex flex-col gap-3 sm:gap-4 xl:flex-row'>
+                <div className='flex items-center justify-center xl:w-1/3'>
+                  <Skeleton.Avatar
+                    active
+                    size={160}
+                    shape='square'
+                    className='!h-32 !w-32 sm:!h-40 sm:!w-40 md:!h-48 md:!w-48'
+                  />
+                </div>
+                <div className='xl:w-2/3'>
+                  <Skeleton active paragraph={{ rows: 5 }} />
+                </div>
               </div>
-              <div className='p-2 md:w-2/3'>
-                <div className='grid grid-cols-1 sm:gap-4 md:grid-cols-2'>
-                  <div className='md:border-r md:pr-4'>
+            ) : (
+              <div className='flex flex-col gap-3 sm:gap-4 xl:flex-row'>
+                <div className='flex items-center justify-center xl:w-1/3'>
+                  <img
+                    src={getProfile.data?.userImageUrl || '/image.png'}
+                    alt='Talaba rasmi'
+                    className='h-32 w-32 rounded-xl object-cover shadow-md sm:h-40 sm:w-40 sm:rounded-2xl md:h-48 md:w-48'
+                  />
+                </div>
+                <div className='xl:w-2/3'>
+                  <h2 className='mb-3 text-lg font-bold text-[#013464] sm:mb-4 sm:text-xl md:text-2xl'>
+                    Shaxsiy malumotlar
+                  </h2>
+                  <div className='space-y-1.5 sm:space-y-2'>
                     {leftInfo.map((item) => (
-                      <p key={item.label} className='py-1 md:text-base'>
-                        <span className='font-semibold'>{item.label}:</span> {item.value}
-                      </p>
-                    ))}
-                  </div>
-                  <div className='md:pl-4'>
-                    {rightInfo.map((item) => (
-                      <p key={item.label} className='py-1 md:text-base'>
-                        <span className='font-semibold'>{item.label}:</span> {item.value}
-                      </p>
+                      <div
+                        key={item.label}
+                        className='flex border-b border-gray-100 py-1.5 text-sm sm:py-2 sm:text-base'
+                      >
+                        <span className='w-28 font-semibold text-gray-700 sm:w-32'>
+                          {item.label}:
+                        </span>
+                        <span className='flex-1 text-gray-900'>{item.value}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className='col-span-12 md:col-span-6 lg:col-span-7'>
+        {/* Modules Section */}
+        <div className='col-span-12'>
           {/* Tabs */}
-          <div className='mt-12 flex justify-between rounded-2xl bg-white px-4 py-2 shadow-xs'>
+          <div className='flex justify-between gap-1 rounded-xl bg-white px-2 py-2 shadow-lg sm:gap-2 sm:rounded-2xl sm:px-4'>
             <button
-              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
-                activeTab === 'done'
-                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
-                  : 'border-transparent text-gray-600'
+              className={`flex-1 cursor-pointer rounded-xl px-2 py-2 text-xs font-semibold transition sm:px-4 sm:py-3 sm:text-sm md:text-base ${
+                activeTab === 'COMPLETED'
+                  ? 'bg-[#F0F7FF] text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('done')}
+              onClick={() => setModuleStatus('COMPLETED')}
             >
               COMPLETED
             </button>
 
             <button
-              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
-                activeTab === 'new'
-                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
-                  : 'border-transparent text-gray-600'
+              className={`flex-1 cursor-pointer rounded-xl px-2 py-2 text-xs font-semibold transition sm:px-4 sm:py-3 sm:text-sm md:text-base ${
+                activeTab === 'FAILED'
+                  ? 'bg-[#F0F7FF] text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('new')}
+              onClick={() => setModuleStatus('FAILED')}
             >
               FAILED
             </button>
 
             <button
-              className={`mx-1 cursor-pointer rounded-2xl border-b-2 px-4 py-2 text-sm font-medium transition md:mx-3 md:p-3 md:text-base md:font-semibold ${
-                activeTab === 'unfinished'
-                  ? 'border-blue-500 bg-[#F0F7FF] text-blue-600'
-                  : 'border-transparent text-gray-600'
+              className={`flex-1 cursor-pointer rounded-xl px-2 py-2 text-xs font-semibold transition sm:px-4 sm:py-3 sm:text-sm md:text-base ${
+                activeTab === 'IN_PROGRESS'
+                  ? 'bg-[#F0F7FF] text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('unfinished')}
+              onClick={() => setModuleStatus('IN_PROGRESS')}
             >
               IN PROGRESS
             </button>
           </div>
 
-          {/* Cards */}
-          {getModules().map((modul) => (
-            <div
-              key={modul.id}
-              className='mt-4 rounded-2xl bg-white px-4 pt-4 pb-6 shadow-xs md:mt-8'
-            >
-              <div className='mb-8 flex flex-col gap-4 md:flex-row md:items-start'>
-                <div className='flex-1'>
-                  <h2 className='mb-2 text-xl font-semibold md:text-2xl'>
-                    {modul.title} (Required)
-                  </h2>
-                  <p className='text-base md:text-lg'>
-                    Universitetning istiqbolli yo’nalishlari (Matn)
-                  </p>
-                </div>
-                <div className='flex flex-col items-start gap-2 md:ml-auto md:items-end'>
-                  <Button
-                    type='primary'
-                    icon={<Check strokeWidth={1.5} />}
-                    size='large'
-                    iconPosition='end'
-                    ghost
-                  >
-                    Tugallangan
-                  </Button>
-                  <Button
-                    type='primary'
-                    icon={<Eye strokeWidth={1.5} />}
-                    size='large'
-                    iconPosition='end'
-                    onClick={handleClick}
-                  >
-                    Sertifikatni ko‘rish
-                  </Button>
-                </div>
-              </div>
-              <Flex gap='small' vertical>
-                <Progress
-                  percent={modul.percent}
-                  percentPosition={{ align: 'center', type: 'inner' }}
-                  style={{ width: '100%' }}
-                  strokeWidth={20}
-                  strokeColor='#008CFF'
-                />
-              </Flex>
+          {/* Module Cards with Loading and Empty States */}
+          {getStatus.isLoading ? (
+            // Loading Skeleton
+            <div className='mt-4 rounded-2xl bg-white px-3 py-4 shadow-lg sm:mt-6 sm:rounded-3xl sm:px-4 sm:py-6 md:px-6'>
+              <Skeleton active paragraph={{ rows: 3 }} />
             </div>
-          ))}
+          ) : getStatus.data && getStatus.data.length > 0 ? (
+            // Module Cards - NEW DESIGN
+            <div className='mt-4 space-y-4 sm:mt-6'>
+              {getStatus.data.map((modul) => (
+                <div
+                  key={modul.id}
+                  className='group overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:shadow-xl sm:rounded-3xl'
+                >
+                  {/* Header Section */}
+                  <div className='border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white px-4 py-4 sm:px-6 sm:py-5'>
+                    <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+                      <div className='flex-1'>
+                        <div className='mb-2 flex items-center gap-2'>
+                          <Award size={20} className='text-blue-600 sm:h-6 sm:w-6' />
+                          <h2 className='text-lg font-bold text-gray-900 sm:text-xl md:text-2xl'>
+                            {modul.moduleName}
+                          </h2>
+                        </div>
+                        <p className='text-sm text-gray-600 sm:text-base'>
+                          {modul.moduleDescription}
+                        </p>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm ${getStatusColor(modul.moduleState)}`}
+                      >
+                        {getStatusIcon(modul.moduleState)}
+                        <span>{modul.moduleState}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className='px-4 py-4 sm:px-6 sm:py-5'>
+                    {/* Progress Section */}
+                    <div className='mb-4'>
+                      <div className='mb-2 flex items-center justify-between'>
+                        <span className='text-sm font-semibold text-gray-700 sm:text-base'>
+                          Tugallanish foizi
+                        </span>
+                        <span className='text-lg font-bold text-blue-600 sm:text-xl'>
+                          {modul.readPercentage || 0}%
+                        </span>
+                      </div>
+                      <Progress
+                        percent={modul.readPercentage || 0}
+                        strokeWidth={12}
+                        strokeColor={{
+                          '0%': '#93c5fd',
+                          '100%': '#2563eb',
+                        }}
+                        trailColor='#e5e7eb'
+                        showInfo={false}
+                        className='sm:strokeWidth-14'
+                      />
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className='flex flex-col gap-2 sm:flex-row sm:gap-3'>
+                      <Button
+                        type='default'
+                        icon={<Check size={18} strokeWidth={2} />}
+                        size='large'
+                        iconPosition='end'
+                        className='flex-1 rounded-xl border-green-200 bg-green-50 font-semibold text-green-700 transition-all hover:!border-green-300 hover:!bg-green-100 hover:!text-green-800'
+                      >
+                        Tugallangan
+                      </Button>
+                      <Button
+                        type='primary'
+                        icon={<Eye size={18} strokeWidth={2} />}
+                        size='large'
+                        iconPosition='end'
+                        onClick={() => setIsOpen(true)}
+                        className='flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 font-semibold shadow-md transition-all hover:!from-blue-700 hover:!to-blue-800 hover:shadow-lg'
+                      >
+                        Sertifikatni korish
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Empty State
+            <div className='mt-4 rounded-2xl bg-white px-3 py-12 shadow-lg sm:mt-6 sm:rounded-3xl sm:px-4 sm:py-16 md:px-6'>
+              <Empty
+                description={
+                  <span className='text-gray-500'>
+                    {activeTab === 'COMPLETED' && "Tugallangan modullar yo'q"}
+                    {activeTab === 'FAILED' && "Muvaffaqiyatsiz modullar yo'q"}
+                    {activeTab === 'IN_PROGRESS' && "Jarayondagi modullar yo'q"}
+                  </span>
+                }
+              />
+            </div>
+          )}
         </div>
 
         {isOpen && (
-          <div className='bg-opacity-80 fixed inset-0 z-70 flex items-center justify-center bg-gradient-to-b from-gray-800 to-blue-700'>
-            <X
-              size={40}
-              strokeWidth={1}
-              className='absolute top-10 right-5 cursor-pointer text-white sm:top-20 sm:right-20'
-              onClick={handleClose}
+          <div className='fixed inset-0 z-50 flex items-center justify-center bg-white/70 p-3 backdrop-blur-sm sm:p-4'>
+            <img
+              src='/sertifikat.png'
+              className='max-h-[90vh] w-full max-w-4xl rounded-xl shadow-2xl sm:rounded-2xl'
+              alt='Sertifikat'
             />
-            <img src='/sertifikat.png' className='w-[90%] max-w-4xl select-none sm:w-[80%]' />
+            <button
+              onClick={() => setIsOpen(false)}
+              className='absolute top-24 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-all hover:scale-110 hover:bg-red-600 sm:top-6 sm:right-6 sm:h-12 sm:w-12 md:top-24 md:right-18'
+            >
+              <X size={24} strokeWidth={2} className='sm:h-7 sm:w-7' />
+            </button>
           </div>
         )}
+
+        {/* Videos Modal */}
+        <Modal
+          open={isVideoModalOpen}
+          onCancel={() => setIsVideoModalOpen(false)}
+          footer={null}
+          width={900}
+          centered
+          className='videos-modal'
+          title={
+            <div className='flex items-center gap-2 text-lg sm:text-xl'>
+              <Clock size={20} className='text-blue-600 sm:h-6 sm:w-6' />
+              <span>Oxirgi korilgan videolar ({validVideos.length})</span>
+            </div>
+          }
+        >
+          <div className='max-h-[60vh] space-y-3 overflow-y-auto p-1 sm:max-h-[70vh] sm:space-y-4 sm:p-2'>
+            {validVideos.length === 0 ? (
+              <div className='py-8 text-center sm:py-12'>
+                <Clock size={40} className='mx-auto mb-3 text-gray-300 sm:h-12 sm:w-12' />
+                <p className='text-sm text-gray-500 sm:text-base'>Hali video korilmagan</p>
+              </div>
+            ) : (
+              validVideos.map((video) => (
+                <div
+                  key={video.attachmentId}
+                  className='group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-xl sm:rounded-2xl'
+                >
+                  <div className='flex flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4'>
+                    <div className='relative overflow-hidden rounded-lg sm:w-44 sm:rounded-xl md:w-48'>
+                      <img
+                        src={video.thumbnailImageUrl}
+                        alt={video.title}
+                        className='h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110 sm:h-24 md:h-28'
+                      />
+                      <div className='absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100'>
+                        <PlayCircle
+                          size={32}
+                          className='text-white sm:h-10 sm:w-10'
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                      <div className='absolute right-1.5 bottom-1.5 rounded-full bg-blue-600 px-1 py-0.5 text-xs font-bold text-white sm:right-2 sm:bottom-2 sm:px-1.5 sm:py-0.5'>
+                        {video.progress}%
+                      </div>
+                    </div>
+
+                    <div className='flex-1'>
+                      <h3 className='mb-2 text-base font-semibold text-gray-900 group-hover:text-blue-600 sm:text-lg'>
+                        {video.title}
+                      </h3>
+                      <p className='mb-2 line-clamp-2 text-xs text-gray-600 sm:mb-3 sm:text-sm'>
+                        {video.description || 'Tavsif mavjud emas'}
+                      </p>
+                      <div className='flex items-center gap-3 text-xs text-gray-500 sm:gap-4'>
+                        <span className='flex items-center gap-1'>
+                          <Check size={12} className='text-green-600 sm:h-3.5 sm:w-3.5' />
+                          Korildi
+                        </span>
+                        <span className='hidden sm:inline'>ID: {video.attachmentId}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='px-3 pb-3 sm:px-4 sm:pb-4'>
+                    <Progress
+                      percent={video.progress}
+                      strokeColor={{
+                        '0%': '#bedbff',
+                        '100%': '#2b7fff',
+                      }}
+                      strokeWidth={6}
+                      showInfo={false}
+                      className='sm:strokeWidth-8'
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Modal>
       </div>
     </div>
   );

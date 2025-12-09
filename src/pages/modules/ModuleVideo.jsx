@@ -61,7 +61,10 @@ export default function ModuleVideo() {
   const addCommentMutation = useMutation({
     mutationFn: (commentText) => addVideoComment(commentText, videoId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['videoComments', videoId]);
+      queryClient.invalidateQueries({
+        queryKey: ['videoComments', videoId],
+        exact: true,
+      });
       setNewComment('');
     },
   });
@@ -76,14 +79,20 @@ export default function ModuleVideo() {
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId) => deleteVideoComment(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['videoComments', videoId]);
+      queryClient.invalidateQueries({
+        queryKey: ['videoComments', videoId],
+        exact: true,
+      });
     },
   });
 
   const updateCommentMutation = useMutation({
     mutationFn: ({ updComment, commentId }) => updateVideoComment(updComment, commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['videoComments', videoId]);
+      queryClient.invalidateQueries({
+        queryKey: ['videoComments', videoId],
+        exact: true,
+      });
       setEditId(null);
       setEditComment('');
     },
@@ -100,14 +109,42 @@ export default function ModuleVideo() {
       const res = await getPercentWatched(videoId, state?.contentId);
       return res.data || 0;
     },
+    enabled: !!videoId && !!state?.contentId,
   });
 
-  // Video percent 95% dan yuqori bo'lsa seenVideo ni true qilish
+  // Video percent 99% dan yuqori bo'lsa seenVideo ni true qilish
   useEffect(() => {
     if (getVideoPercent.data?.percent >= 99) {
       setSeenVideo(true);
     }
   }, [getVideoPercent.data?.percent]);
+
+  // Video saqlangan joydan boshlanishi uchun
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !getVideoPercent.data || getVideoPercent.isLoading) return;
+
+    const savedPercent = getVideoPercent.data?.percent;
+
+    // Agar video hali boshlanmagan bo'lsa va saqlangan foiz bor bo'lsa (0% dan katta va 100% dan kichik)
+    if (savedPercent && savedPercent > 0 && savedPercent < 100) {
+      const handleCanPlay = () => {
+        const duration = video.duration;
+        if (duration && duration > 0) {
+          // Foizni sekundga o'girish
+          const savedTime = (savedPercent / 100) * duration;
+          video.currentTime = savedTime;
+          console.log(`Video ${savedPercent}% dan davom ettirildi (${savedTime.toFixed(2)}s)`);
+        }
+      };
+
+      video.addEventListener('canplay', handleCanPlay, { once: true });
+
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay);
+      };
+    }
+  }, [getVideoPercent.data, getVideoPercent.isLoading]);
 
   const updateVideoProgress = () => {
     const video = videoRef.current;
@@ -126,7 +163,7 @@ export default function ModuleVideo() {
     const now = Date.now();
     if (now - lastUpdateTimeRef.current >= 3000) {
       lastUpdateTimeRef.current = now;
-      if (percent > getVideoPercent.data?.percent) {
+      if (percent > (getVideoPercent.data?.percent || 0)) {
         uptVideoMutation.mutate(
           {
             attachmentId: videoId,
@@ -135,7 +172,7 @@ export default function ModuleVideo() {
           },
           {
             onSuccess: () => {
-              if (percent >= 100) {
+              if (percent >= 99) {
                 setSeenVideo(true);
                 queryClient.invalidateQueries(['videoPercent', videoId]);
               }
@@ -177,21 +214,23 @@ export default function ModuleVideo() {
 
     const percent = Math.floor((currentTime / duration) * 100);
 
-    uptVideoMutation.mutate(
-      {
-        attachmentId: videoId,
-        percent: percent,
-        contentId: state?.contentId,
-      },
-      {
-        onSuccess: () => {
-          if (percent >= 99) {
-            setSeenVideo(true);
-            queryClient.invalidateQueries(['videoPercent', videoId]);
-          }
+    if (percent > (getVideoPercent.data?.percent || 0)) {
+      uptVideoMutation.mutate(
+        {
+          attachmentId: videoId,
+          percent: percent,
+          contentId: state?.contentId,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            if (percent >= 99) {
+              setSeenVideo(true);
+              queryClient.invalidateQueries(['videoPercent', videoId]);
+            }
+          },
+        }
+      );
+    }
   };
 
   const handleEnded = () => {
@@ -210,14 +249,6 @@ export default function ModuleVideo() {
         },
       }
     );
-  };
-
-  const handleLoadedMetadata = () => {
-    const video = videoRef.current;
-    if (!video || !attachment.data?.lastWatchedTime) return;
-
-    // Agar avval ko'rilgan bo'lsa, o'sha joydan davom ettirish
-    video.currentTime = attachment.data.lastWatchedTime;
   };
 
   // Cleanup on unmount
@@ -264,7 +295,6 @@ export default function ModuleVideo() {
               onPlay={handlePlay}
               onPause={handlePause}
               onEnded={handleEnded}
-              onLoadedMetadata={handleLoadedMetadata}
             >
               <source
                 src={`https://dev.anvarovich.uz/api/student/content-video/${videoId}/stream`}
@@ -308,7 +338,7 @@ export default function ModuleVideo() {
                 placeholder='Fikr bildirish...'
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className='flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none sm:rounded-2xl sm:py-2.5 sm:text-base'
+                className={`flex-1 rounded-xl border border-gray-300 ${addCommentMutation.isError && 'border-2 border-red-500 ring-2 ring-red-300'} px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none sm:rounded-2xl sm:py-2.5 sm:text-base`}
                 disabled={addCommentMutation.isPending}
               />
               <button
@@ -323,11 +353,6 @@ export default function ModuleVideo() {
                 <span className='sm:hidden'>Yuborish</span>
               </button>
             </div>
-            {addCommentMutation.isError && (
-              <p className='text-xs text-red-500 sm:text-sm'>
-                Xatolik: {addCommentMutation.error.message}
-              </p>
-            )}
           </div>
         </div>
 

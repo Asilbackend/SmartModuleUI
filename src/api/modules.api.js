@@ -21,3 +21,6 @@ export const postPictureContent = (attachmentId, contentId) =>
   axiosClient.post('student/module-content/readFileFromContent', null, {
     params: { attachmentId, contentId },
   });
+
+export const getContentText = (title) =>
+  axiosClient.get(`student/module-content/findContentTextByTitle?title=${title}`);
