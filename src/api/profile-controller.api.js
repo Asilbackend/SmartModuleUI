@@ -5,3 +5,5 @@ export const getLastViewedVideos = () =>
   axiosClient.get('student/profile/lastVideos?page=0&size=20');
 export const getModuleStatus = (status) =>
   axiosClient.get(`student/profile/filter-by-status?userModuleStatus=${status}`);
+export const getModuleIdByContentId = (contentId) =>
+  axiosClient.get(`student/profile/getModuleIdByContentId?contentId=${contentId}`);
