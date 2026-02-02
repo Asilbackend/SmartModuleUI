@@ -302,7 +302,7 @@ const TestComponent = ({ questions, duration }) => {
           {isFinished && userAnswer === currentQuestion.answer && (
             <div className='flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2'>
               <CheckCircle2 size={16} className='text-green-600' />
-              <p className='text-xs font-medium text-green-800 sm:text-sm'>To'g'ri javob! 🎉</p>
+              <p className='text-xs font-medium text-green-800 sm:text-sm'>To`g`ri javob! 🎉</p>
             </div>
           )}
 
@@ -310,7 +310,7 @@ const TestComponent = ({ questions, duration }) => {
             <div className='flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2'>
               <XCircle size={16} className='text-red-600' />
               <p className='text-xs font-medium text-red-800 sm:text-sm'>
-                Noto'g'ri javob. To'g'ri javob: {currentQuestion.answer}
+                Noto`g`ri javob. To`g`ri javob: {currentQuestion.answer}
               </p>
             </div>
           )}

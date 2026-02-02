@@ -1,14 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Empty, Skeleton } from 'antd';
 import { PlayCircle, Star } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { getModuleIdByContentId } from 'src/api/profile-controller.api';
 import { getTopVideos } from 'src/api/topVideos';
 
 const VideoCard = ({ title, desc, img, required, avgRating }) => {
   const [loaded, setLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-
   return (
     <div className='group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.98] sm:rounded-3xl'>
       <div className='relative aspect-video w-full overflow-hidden'>
@@ -73,6 +73,8 @@ const VideoCard = ({ title, desc, img, required, avgRating }) => {
 };
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data, isPending, error } = useQuery({
     queryKey: ['topVideos'],
     queryFn: async () => {
@@ -82,6 +84,20 @@ const HomePage = () => {
   });
 
   const videos = data || [];
+  console.log(videos);
+
+  async function routeToVideo(contentId, title, attachmentId) {
+    const moduleId = await queryClient.fetchQuery({
+      queryKey: ['moduleId', contentId],
+      queryFn: () => getModuleIdByContentId(contentId).then((res) => res.data.moduleId),
+    });
+    navigate(`/modules/${moduleId}/video/${attachmentId}`, {
+      state: {
+        title: title,
+        contentId: contentId,
+      },
+    });
+  }
 
   return (
     <div className='mx-auto w-full max-w-6xl p-3 sm:p-4'>
@@ -177,9 +193,8 @@ const HomePage = () => {
           {!isPending && !error && videos.length > 0 && (
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3'>
               {videos.map((item, index) => (
-                <Link
-                  to={`/modules/1/video/${item.attachmentId}`}
-                  state={{ title: item.title }}
+                <div
+                  onClick={() => routeToVideo(item.contentId, item.title, item.attachmentId)}
                   key={index}
                   className='block transition-transform duration-300 hover:-translate-y-1'
                 >
@@ -190,7 +205,7 @@ const HomePage = () => {
                     required={item.required}
                     avgRating={item.avgRating}
                   />
-                </Link>
+                </div>
               ))}
             </div>
           )}

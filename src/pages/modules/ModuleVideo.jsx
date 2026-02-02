@@ -290,7 +290,7 @@ export default function ModuleVideo() {
               ref={videoRef}
               controls
               poster={attachment.data?.thumbnailImageUrl}
-              className='aspect-video w-full rounded-t-2xl object-cover sm:rounded-t-3xl'
+              className='aspect-video w-full rounded-t-2xl bg-black object-contain sm:rounded-t-3xl'
               playsInline
               onPlay={handlePlay}
               onPause={handlePause}

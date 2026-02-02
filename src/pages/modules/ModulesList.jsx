@@ -1,13 +1,17 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Empty, Skeleton, Steps } from 'antd';
-import { BookOpenText, CheckCircle2, TvMinimalPlay } from 'lucide-react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Empty, Modal, Skeleton, Steps } from 'antd';
+import { AlertCircle, BookOpenText, CheckCircle2 } from 'lucide-react';
+import { TvMinimalPlay } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getModuleById, postStartContent } from 'src/api/modules.api';
+import { getStartTest } from 'src/api/test-page.api';
 
 export default function ModuleList() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   const { data, isPending, error } = useQuery({
     queryKey: ['module-content', id],
@@ -18,6 +22,43 @@ export default function ModuleList() {
     enabled: !!id,
   });
 
+  const startTest = useMutation({
+    mutationFn: () => getStartTest(id),
+    onSuccess: () => {
+      navigate(`/modules/${id}/test`);
+    },
+    onError: (error) => {
+      console.error('Testni boshlashda xato:', error);
+    },
+  });
+
+  // Scroll pozitsiyasini tiklash
+  useEffect(() => {
+    if (!isPending && data) {
+      const savedScrollPosition = sessionStorage.getItem(`module-scroll-${id}`);
+      if (savedScrollPosition) {
+        // Main container yoki window'ga scroll qilish
+        const scrollContainer = document.querySelector('main') || window;
+
+        setTimeout(() => {
+          if (scrollContainer === window) {
+            window.scrollTo(0, parseInt(savedScrollPosition));
+          } else {
+            scrollContainer.scrollTop = parseInt(savedScrollPosition);
+          }
+          sessionStorage.removeItem(`module-scroll-${id}`);
+        }, 100);
+      }
+    }
+  }, [id, isPending, data]);
+
+  // Scroll pozitsiyasini saqlash
+  const saveScrollPosition = () => {
+    const scrollContainer = document.querySelector('main');
+    const scrollPosition = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+    sessionStorage.setItem(`module-scroll-${id}`, scrollPosition.toString());
+  };
+
   const moduleData = data || [];
 
   const startContentMutation = useMutation({
@@ -25,6 +66,7 @@ export default function ModuleList() {
   });
 
   const handleStepClick = (sectionId, item, index) => {
+    saveScrollPosition();
     if (!item.isRead && index === 0) {
       startContentMutation.mutate(sectionId);
     }
@@ -55,6 +97,15 @@ export default function ModuleList() {
         },
       });
     }
+  };
+
+  const handleTestButtonClick = () => {
+    setIsTestModalOpen(true);
+  };
+
+  const handleStartTest = () => {
+    setIsTestModalOpen(false);
+    startTest.mutate(id);
   };
 
   const ModuleSkeleton = () => {
@@ -131,6 +182,25 @@ export default function ModuleList() {
       </div>
     );
   };
+
+  // Check if all required content is completed
+  const isAllRequiredContentCompleted = () => {
+    if (!moduleData.length) return false;
+
+    // Filter only required content sections
+    const requiredSections = moduleData.filter((section) => section.isRequiredContent);
+
+    // If no required sections, allow test
+    if (requiredSections.length === 0) return true;
+
+    // Check if all required sections have all their attachments read
+    return requiredSections.every((section) => {
+      // Check if all attachments in this section are read
+      return section.attachmentDetails.every((attachment) => attachment.isRead);
+    });
+  };
+
+  const canStartTest = isAllRequiredContentCompleted();
 
   if (isPending) return <ModuleSkeleton />;
 
@@ -334,12 +404,88 @@ export default function ModuleList() {
           );
         })}
 
-        <Link to={`/modules/${id}/test`}>
-          <button className='mt-6 w-full cursor-pointer rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl active:scale-95'>
-            Keyingi modulga o`tish →
+        {/* Test Button - Disabled until all required content is completed */}
+        <div className='relative'>
+          <button
+            onClick={handleTestButtonClick}
+            disabled={!canStartTest}
+            className={`mt-6 w-full rounded-xl px-5 py-3 font-semibold shadow-lg transition-all ${
+              canStartTest
+                ? 'cursor-pointer bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl active:scale-95'
+                : 'cursor-not-allowed bg-gray-300 text-gray-500 opacity-60'
+            }`}
+          >
+            Modul boyicha testni boshlash
           </button>
-        </Link>
+
+          {/* Warning message when button is disabled */}
+          {!canStartTest && (
+            <div className='mt-3 flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700'>
+              <AlertCircle size={18} className='flex-shrink-0' />
+              <span>Testni boshlash uchun barcha majburiy mavzularni tugallang</span>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Test Modal */}
+      <Modal
+        open={isTestModalOpen}
+        onCancel={() => setIsTestModalOpen(false)}
+        footer={null}
+        centered
+        width={600}
+        className='test-modal'
+      >
+        <div className='p-4 sm:p-6'>
+          <div className='mb-6 flex items-center gap-3'>
+            <div className='rounded-full bg-blue-100 p-3'>
+              <AlertCircle size={24} className='text-blue-600' />
+            </div>
+            <h3 className='text-xl font-bold text-[#013464] sm:text-2xl'>Test qoidalari</h3>
+          </div>
+
+          <div className='mb-6 space-y-4'>
+            <div className='rounded-xl bg-gray-50 p-4'>
+              <h4 className='mb-2 font-semibold text-gray-900'>Eslatma:</h4>
+              <ul className='space-y-2 text-sm text-gray-600'>
+                <li className='flex items-start gap-2'>
+                  <span className='mt-1 text-blue-600'>•</span>
+                  <span>Testni boshlashdan oldin barcha mavzularni diqqat bilan o`rganing</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='mt-1 text-blue-600'>•</span>
+                  <span>Har bir savol uchun belgilangan vaqt ichida javob bering</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='mt-1 text-blue-600'>•</span>
+                  <span>Test bir marta boshlanganidan keyin to`xtatib bo`lmaydi</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='mt-1 text-blue-600'>•</span>
+                  <span>O`tish balli: 70% va undan yuqori</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className='flex flex-col gap-3 sm:flex-row sm:justify-end'>
+            <button
+              onClick={() => setIsTestModalOpen(false)}
+              className='w-full rounded-xl border border-gray-300 px-6 py-2.5 font-medium text-gray-700 transition-all hover:bg-gray-50 sm:w-auto'
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleStartTest}
+              disabled={startTest.isPending}
+              className='w-full rounded-xl bg-blue-600 px-6 py-2.5 font-semibold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto'
+            >
+              {startTest.isPending ? 'Yuklanmoqda...' : 'Testni boshlash'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

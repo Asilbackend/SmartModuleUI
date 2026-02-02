@@ -1,4 +1,4 @@
-export const Questions = [
+export const questions = [
   {
     question:
       'O‘zbekiston Respublikasining Birinchi Prezidenti Islom Karimov qaysi shaharda dafn etilgan?',
