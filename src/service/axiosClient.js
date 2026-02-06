@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://dev.anvarovich.uz/api';
+const BASE_URL = 'https://newdev.anvarovich.uz/api';
 
 const axiosClient = axios.create({
   baseURL: BASE_URL,

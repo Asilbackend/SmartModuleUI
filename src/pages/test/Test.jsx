@@ -104,7 +104,13 @@ const TestSkeleton = () => {
         <div className='hidden border-b border-gray-100 p-4 sm:p-5 md:block'>
           <div className='flex flex-wrap gap-2'>
             {[...Array(10)].map((_, idx) => (
-              <Skeleton.Button key={idx} active size='default' shape='square' style={{ width: 48, height: 48 }} />
+              <Skeleton.Button
+                key={idx}
+                active
+                size='default'
+                shape='square'
+                style={{ width: 48, height: 48 }}
+              />
             ))}
           </div>
         </div>
@@ -125,8 +131,16 @@ const TestSkeleton = () => {
         {/* Options Skeleton */}
         <div className='space-y-2 p-4 sm:space-y-3 sm:p-6'>
           {[...Array(4)].map((_, idx) => (
-            <div key={idx} className='flex w-full items-center overflow-hidden rounded-xl border-2 border-gray-200'>
-              <Skeleton.Button active size='large' shape='square' style={{ width: 60, height: 60 }} />
+            <div
+              key={idx}
+              className='flex w-full items-center overflow-hidden rounded-xl border-2 border-gray-200'
+            >
+              <Skeleton.Button
+                active
+                size='large'
+                shape='square'
+                style={{ width: 60, height: 60 }}
+              />
               <div className='flex-1 px-4'>
                 <Skeleton active paragraph={{ rows: 1 }} title={false} />
               </div>
@@ -156,7 +170,11 @@ const Test = () => {
   const [isFinished, setIsFinished] = useState(false);
   const { moduleId } = useParams();
 
-  const { data: questions = [], isLoading, refetch: refetchQuestions } = useQuery({
+  const {
+    data: questions = [],
+    isLoading,
+    refetch: refetchQuestions,
+  } = useQuery({
     queryKey: ['allQuestionsbyId', moduleId],
     queryFn: async () => {
       const res = await getAllQuestionsbyId(moduleId);
@@ -420,7 +438,7 @@ const Test = () => {
                 <p className='mb-1 text-xs font-medium text-gray-600 sm:text-sm'>
                   Savol {currentIndex + 1} / {questions.length}
                 </p>
-                <h2 className='text-lg font-bold leading-relaxed text-gray-900 sm:text-xl sm:leading-relaxed break-words'>
+                <h2 className='text-lg leading-relaxed font-bold break-words text-gray-900 sm:text-xl sm:leading-relaxed'>
                   {currentQuestion.question}
                 </h2>
               </div>

@@ -510,7 +510,7 @@ const ProfilePage = () => {
             </div>
           ) : (
             // Empty State
-            <div className='mt-4 rounded-2xl bg-white px-3 py-12 shadow-lg sm:mt-6 sm:rounded-3xl sm:px-4 sm:py-16 md:px-6'>
+            <div className='mt-4 rounded-2xl px-3 py-24 sm:mt-6 sm:rounded-3xl sm:px-4 sm:py-48 md:px-6'>
               <Empty
                 description={
                   <span className='text-gray-500'>

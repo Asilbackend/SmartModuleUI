@@ -27,7 +27,13 @@ const ModuleFile = () => {
   };
   return (
     <>
-      <div>{data?.url && <div>URL: {data.url}</div>}</div>
+      <div>
+        {data?.url && (
+          <div>
+            <img src={data.url} alt='' />
+          </div>
+        )}
+      </div>
       <Button
         onClick={postReed}
         disabled={

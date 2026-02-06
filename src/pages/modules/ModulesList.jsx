@@ -226,7 +226,7 @@ export default function ModuleList() {
   if (!moduleData.length) {
     return (
       <div className='mx-auto w-full max-w-6xl p-3 sm:p-4'>
-        <div className='rounded-2xl bg-white p-12 shadow-lg sm:rounded-3xl sm:p-16'>
+        <div className='rounded-2xl p-24 sm:rounded-3xl sm:p-48'>
           <Empty description={<span className='text-gray-500'>Ma`lumot topilmadi</span>} />
         </div>
       </div>

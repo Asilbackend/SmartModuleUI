@@ -297,7 +297,7 @@ export default function ModuleVideo() {
               onEnded={handleEnded}
             >
               <source
-                src={`https://dev.anvarovich.uz/api/student/content-video/${videoId}/stream`}
+                src={`https://newdev.anvarovich.uz/api/student/content-video/${videoId}/stream`}
                 type='video/mp4'
               />
               Sizning brauzeringiz videoni qollab-quvvatlamaydi.
