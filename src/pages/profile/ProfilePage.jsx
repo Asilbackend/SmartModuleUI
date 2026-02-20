@@ -1,9 +1,11 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import PdfViewer from '@components/ui/PdfViewer';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Empty, Modal, Progress, Skeleton } from 'antd';
 import {
   Award,
   Check,
   Clock,
+  Download,
   ExternalLink,
   Eye,
   PlayCircle,
@@ -13,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCertificate } from 'src/api/certificate-controller';
 import {
   getLastViewedVideos,
   getModuleIdByContentId,
@@ -24,6 +27,7 @@ const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('COMPLETED');
+  const [certificateUrl, setCertificateUrl] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -48,6 +52,16 @@ const ProfilePage = () => {
     queryFn: async () => {
       const res = await getModuleStatus(activeTab);
       return res.data || [];
+    },
+  });
+
+  const certificateMutation = useMutation({
+    mutationFn: (moduleId) => getCertificate(moduleId),
+    onSuccess: (res) => {
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      setCertificateUrl(url);
+      setIsOpen(true);
     },
   });
 
@@ -458,7 +472,7 @@ const ProfilePage = () => {
                           iconPosition='end'
                           className='flex-1 rounded-xl border-green-200 bg-green-50 font-semibold text-green-700 transition-all hover:!border-green-300 hover:!bg-green-100 hover:!text-green-800'
                         >
-                          {activeTab === 'COMPLETED' ? 'Muvaffaqiyatli tugallangan' : 'Yakunlash'}
+                          Muvaffaqiyatli tugallangan
                         </Button>
                       ) : (
                         <Button
@@ -468,8 +482,6 @@ const ProfilePage = () => {
                           onClick={() =>
                             navigate(`/modules/${modul.moduleId}`, {
                               state: {
-                                title: modul.moduleName,
-                                desc: modul.moduleDescription,
                                 contentId: modul.contentId,
                               },
                             })
@@ -482,6 +494,11 @@ const ProfilePage = () => {
                       )}
                       {activeTab === 'COMPLETED' && (
                         <Button
+                          className={`flex-1 rounded-xl font-semibold shadow-md transition-all hover:shadow-lg ${
+                            modul.successExam
+                              ? 'bg-gradient-to-r from-green-600 to-emerald-700 hover:!from-green-700 hover:!to-emerald-800'
+                              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:!from-blue-700 hover:!to-blue-800'
+                          }`}
                           type='primary'
                           icon={
                             modul.successExam ? (
@@ -492,13 +509,9 @@ const ProfilePage = () => {
                           }
                           size='large'
                           disabled={!modul.successExam}
+                          loading={certificateMutation.isPending}
                           iconPosition='end'
-                          onClick={() => setIsOpen(true)}
-                          className={`flex-1 rounded-xl font-semibold shadow-md transition-all hover:shadow-lg ${
-                            modul.successExam
-                              ? 'bg-gradient-to-r from-green-600 to-emerald-700 hover:!from-green-700 hover:!to-emerald-800'
-                              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:!from-blue-700 hover:!to-blue-800'
-                          }`}
+                          onClick={() => certificateMutation.mutate(modul.moduleId)} // moduleId yuboriladi
                         >
                           Sertifikatni korish
                         </Button>
@@ -526,21 +539,25 @@ const ProfilePage = () => {
 
         {isOpen && (
           <div className='fixed inset-0 z-50 flex items-center justify-center bg-white/70 p-3 backdrop-blur-sm sm:p-4'>
-            <img
-              src='/sertifikat.png'
-              className='max-h-[90vh] w-full max-w-4xl rounded-xl shadow-2xl sm:rounded-2xl'
-              alt='Sertifikat'
-            />
-            <button
-              onClick={() => setIsOpen(false)}
-              className='absolute top-24 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-all hover:scale-110 hover:bg-red-600 sm:top-6 sm:right-6 sm:h-12 sm:w-12 md:top-24 md:right-18'
-            >
-              <X size={24} strokeWidth={2} className='sm:h-7 sm:w-7' />
-            </button>
+            <PdfViewer pdf={certificateUrl} />
+            <div className='absolute top-24 right-3 flex gap-2 sm:right-14'>
+              <a
+                href={certificateUrl}
+                download='sertifikat.pdf'
+                className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600'
+              >
+                <Download size={24} />
+              </a>
+              <button
+                onClick={() => setIsOpen(false)}
+                className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600'
+              >
+                <X size={24} />
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Videos Modal */}
         <Modal
           open={isVideoModalOpen}
           onCancel={() => setIsVideoModalOpen(false)}

@@ -1,30 +1,22 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
 import { Checkbox, Empty, Spin } from 'antd';
 import { ArrowLeftToLine, BookCheck, ChevronDown, House, Layers, UserRound } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { getAllModules } from 'src/api/modules.api';
+import { useModule } from 'src/hooks/useModule';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isModulesOpen, setIsModulesOpen] = useState(false);
   const contentRef = useRef(null);
+  const { module, isPending, error } = useModule();
 
   const otherNavItems = [
     { name: 'Bosh sahifa', href: '/home', icon: <House size={20} /> },
     { name: 'Marifat darslari', href: '/enlightenment', icon: <BookCheck size={20} /> },
   ];
 
-  const { data, isPending, error } = useQuery({
-    queryKey: ['modules'],
-    queryFn: async () => {
-      const response = await getAllModules();
-      return response.data.content || [];
-    },
-  });
-
-  const modules = data || [];
+  const modules = module || [];
 
   return (
     <aside
@@ -126,7 +118,7 @@ const Sidebar = () => {
                 ref={contentRef}
                 style={{
                   height: isModulesOpen ? `${contentRef.current?.scrollHeight}px` : '0px',
-                  maxHeight: isModulesOpen ? '400px' : '0px',
+                  maxHeight: isModulesOpen ? '385px' : '0px',
                 }}
                 className='custom-scroll overflow-hidden overflow-y-auto transition-all duration-300'
               >

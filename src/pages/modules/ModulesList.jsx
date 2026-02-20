@@ -3,15 +3,18 @@ import { Empty, Modal, Skeleton, Steps } from 'antd';
 import { AlertCircle, BookOpenText, CheckCircle2 } from 'lucide-react';
 import { TvMinimalPlay } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getModuleById, postStartContent } from 'src/api/modules.api';
 import { getStartTest } from 'src/api/test-page.api';
+import { useModule } from 'src/hooks/useModule';
 
 export default function ModuleList() {
   const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
+  const { module } = useModule();
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+
+  const selectedModule = module.find((item) => item.id === Number(id));
 
   const { data, isPending, error } = useQuery({
     queryKey: ['module-content', id],
@@ -233,8 +236,6 @@ export default function ModuleList() {
     );
   }
 
-  const { title, desc } = location.state || {};
-
   return (
     <div className='mx-auto w-full max-w-6xl p-3 sm:p-4'>
       <div className='space-y-4 sm:space-y-6'>
@@ -242,9 +243,9 @@ export default function ModuleList() {
         <div className='rounded-2xl bg-white p-3 shadow-lg sm:rounded-3xl sm:p-6'>
           <div className='mb-2 flex items-center gap-2'>
             <BookOpenText size={20} className='text-blue-600 sm:h-6 sm:w-6' />
-            <h2 className='text-xl font-bold text-[#013464] sm:text-2xl'>{title}</h2>
+            <h2 className='text-xl font-bold text-[#013464] sm:text-2xl'>{selectedModule?.name}</h2>
           </div>
-          <p className='text-sm text-gray-600 sm:text-base'>{desc}</p>
+          <p className='text-sm text-gray-600 sm:text-base'>{selectedModule?.description}</p>
         </div>
 
         {/* Module Sections */}

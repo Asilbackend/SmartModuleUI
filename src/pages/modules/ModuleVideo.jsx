@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Rate, Skeleton } from 'antd';
+import { Button, Rate, Skeleton } from 'antd';
 import { Check, Edit, MessageCircle, Send, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { VideoImg } from 'src/api/attachment-controller.api';
 import {
   addVideoComment,
@@ -26,6 +26,11 @@ export default function ModuleVideo() {
   const lastUpdateTimeRef = useRef(0);
   const updateIntervalRef = useRef(null);
   const { state } = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const pathParts = location.pathname.split('/');
+  const moduleId = pathParts[2];
 
   const {
     data: comments = [],
@@ -274,6 +279,9 @@ export default function ModuleVideo() {
 
   return (
     <div className='mx-auto w-full max-w-4xl space-y-4 p-3 sm:space-y-6 lg:space-y-8 lg:p-4'>
+      <Button className='mb-2' onClick={() => navigate(`/modules/${moduleId}`)}>
+        Back
+      </Button>
       {/* Video Section */}
       <div className='overflow-hidden rounded-2xl bg-white shadow-xs sm:rounded-3xl'>
         {attachment.isPending ? (

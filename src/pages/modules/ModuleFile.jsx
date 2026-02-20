@@ -1,12 +1,16 @@
+import PdfViewer from '@components/ui/PdfViewer';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from 'antd';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { VideoImg } from 'src/api/attachment-controller.api';
 import { postPictureContent } from 'src/api/modules.api';
 
 const ModuleFile = () => {
   const { state } = useLocation();
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathParts = location.pathname.split('/');
+  const moduleId = pathParts[2];
   const { data } = useQuery({
     queryKey: ['moduleFile', state.attachmentId],
     queryFn: async () => {
@@ -19,23 +23,27 @@ const ModuleFile = () => {
   const pictureContentMutation = useMutation({
     mutationFn: ({ attachmentId, contentId }) => postPictureContent(attachmentId, contentId),
   });
+
   const postReed = () => {
     pictureContentMutation.mutate({
       attachmentId: state.attachmentId,
       contentId: state.contentId,
     });
   };
+
   return (
     <>
-      <div>
+      <div className='mx-auto my-8 w-full max-w-6xl px-4'>
+        <Button className='mb-2' onClick={() => navigate(`/modules/${moduleId}`)}>
+          Back
+        </Button>
         {data?.url && (
-          <div>
-            <img src={data.url} alt='' />
-          </div>
+          <PdfViewer pdf={data.url} attachType={data.attachType} fileName={data.fileName} />
         )}
       </div>
       <Button
         onClick={postReed}
+        className='mb-12'
         disabled={
           state.finish || pictureContentMutation.isPending || pictureContentMutation.isSuccess
         }
@@ -51,5 +59,4 @@ const ModuleFile = () => {
     </>
   );
 };
-
 export default ModuleFile;
